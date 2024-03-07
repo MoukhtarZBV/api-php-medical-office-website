@@ -8,14 +8,14 @@
             if ($data["login"] == "CABINET" && $data["password"] == "CABINET") {
                 $headers = array('alg'=>'HS256', 'typ'=>'JWT');
                 $payload = array('username'=>$data["login"], 'exp'=>(time() + 60), 'role'=>$user["role"]);
-                deliver_response(200, "Login success", generate_jwt($headers, $payload, 'CabinetMed'));
+                fournirReponse(200, "Login success", generate_jwt($headers, $payload, 'CabinetMed'));
             } else {
-                deliver_response(400, "Login error", "null");
+                fournirReponse(400, "Login error", "null");
             }
         }
     }
 
-    function deliver_response($status_code, $status_message, $data = null)
+    function fournirReponse($status_code, $status_message, $data = null)
     {
         http_response_code($status_code);
         header("Content-Type:application/json; charset=utf-8");

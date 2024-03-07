@@ -11,36 +11,6 @@
         $date = $_POST["date"];
     }
 
-    $reqConsultations = "SELECT CONCAT(m.nom, ' ', m.prenom) as nomMed, 
-                                    CONCAT(u.nom, ' ', u.prenom) as nomUsager, 
-                                    CONCAT(c.idMedecin, '$', c.dateConsultation, '$', c.heureDebut) as cle,
-                                    dateConsultation, heureDebut, duree
-                                FROM medecin m, usager u, consultation c 
-                                WHERE c.idMedecin = m.idMedecin 
-                                AND c.idUsager = u.idUsager ";
-
-    $arguments = array();
-
-    // Recherche en fonction des filtres
-    if (!empty($idMedecin)) {
-        $reqConsultations = $reqConsultations . "AND c.idMedecin = ? ";
-        array_push($arguments, $idMedecin);
-    }
-    if (!empty($idUsager)) {
-        $reqConsultations = $reqConsultations . "AND c.idUsager = ? ";
-        array_push($arguments, $idUsager);
-    }
-    if (!empty($date)) {
-        $reqConsultations = $reqConsultations . "AND dateConsultation = ? ";
-        array_push($arguments, $date);
-    }
-
-    $reqConsultations = $reqConsultations . "ORDER BY dateConsultation DESC, heureDebut DESC;";
-    
-    $stmt = $pdo->prepare($reqConsultations);
-    verifierPrepare($stmt);
-    verifierExecute($stmt->execute($arguments));
-
     // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
     $table = '';
     $nombreLignes = '';
