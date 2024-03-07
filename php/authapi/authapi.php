@@ -1,21 +1,43 @@
 <?php
+
     require ("jwt_utils.php");
-    require ("../connexionDB.php");
+    require ("connexionDB.php");
+
     if ($_SERVER["REQUEST_METHOD"] == "POST") {
+
+        //recuperation du body de la requête POST
         $postedData = file_get_contents('php://input');
         $data = json_decode($postedData,true); 
-        if (!empty($data["login"]) && !empty($data["password"])) {
-            if ($data["login"] == "CABINET" && $data["password"] == "CABINET") {
-                $headers = array('alg'=>'HS256', 'typ'=>'JWT');
-                $payload = array('username'=>$data["login"], 'exp'=>(time() + 60), 'role'=>$user["role"]);
-                fournirReponse(200, "Login success", generate_jwt($headers, $payload, 'CabinetMed'));
-            } else {
-                fournirReponse(400, "Login error", "null");
-            }
+
+        //verif de la validité du login
+        $pdo = createConnection();
+
+        //si les logins sont valides, alors on va fournir un jeton à l'utilisateur
+        if (getUser($pdo,$data['username'],$data['password'])) {
+            $user = getUser($pdo,$data['username'],$data['password']);
+            $headers = array('alg'=>('HS256'),'typ'=>'JWT');
+            $payload = array('username'=>$data['username'], 'exp'=>(time()+60), 'role'=>$user['role']);
+            $jwt = generate_jwt($headers,$payload,"secret");
+            deliver_response(200, "Welcome!", $jwt);
+        } else {
+            deliver_response(401, "Incorrect logins, try again!", null);
         }
+        
     }
 
-    function fournirReponse($status_code, $status_message, $data = null)
+    function getUser(PDO $pdo, string $login, string $password) {
+        $stmt = $pdo->prepare("SELECT * FROM user WHERE login = ?");
+        $stmt->execute([$login]);
+        if ($res = $stmt->fetch()) {
+            if (password_verify($password,$res["password"])) {
+                return $res;
+            }
+        }
+        return null;
+            
+    }
+
+    function deliver_response($status_code, $status_message, $data = null)
     {
         http_response_code($status_code);
         header("Content-Type:application/json; charset=utf-8");
@@ -29,9 +51,4 @@
         echo $json_response;
     }
 
-    function getUser(PDO $pdo, string $login, string $password) : array | null {
-        $stmt = $pdo->prepare("SELECT * FROM user WHERE login = ? AND password = ?");
-        $stmt->execute([$login, $password]);
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+?>
