@@ -13,14 +13,14 @@
         $pdo = createConnection();
 
         //si les logins sont valides, alors on va fournir un jeton à l'utilisateur
-        if (getUser($pdo,$data['username'],$data['password'])) {
-            $user = getUser($pdo,$data['username'],$data['password']);
+        if (getUser($pdo,$data['login'],$data['password'])) {
+            $user = getUser($pdo,$data['login'],$data['password']);
             $headers = array('alg'=>('HS256'),'typ'=>'JWT');
-            $payload = array('username'=>$data['username'], 'exp'=>(time()+60), 'role'=>$user['role']);
+            $payload = array('login'=>$data['login'], 'exp'=>(time()+60), 'role'=>$user['role']);
             $jwt = generate_jwt($headers,$payload,"secret");
-            deliver_response(200, "Welcome!", $jwt);
+            fournirReponse("Succes", 200, "Login réussi", $jwt);
         } else {
-            deliver_response(401, "Incorrect logins, try again!", null);
+            fournirReponse("Erreur", 401, "Login et/ou mot de passe incorrect(s)", null);
         }
         
     }
@@ -37,18 +37,18 @@
             
     }
 
-    function deliver_response($status_code, $status_message, $data = null)
-    {
-        http_response_code($status_code);
+    function fournirReponse(string $statut, string $statutCode, string $statutMessage, mixed $donnees = null) : void {
+        http_response_code($statutCode);
         header("Content-Type:application/json; charset=utf-8");
-        $response['status_code'] = $status_code;
-        $response['status_message'] = $status_message;
-        $response['data'] = $data;
-        $json_response = json_encode($response);
-        if ($json_response === false) {
+        $reponse['statut'] = $statut;
+        $reponse['statutCode'] = $statutCode;
+        $reponse['statutMessage'] = $statutMessage;
+        $reponse['donnees'] = $donnees;
+        $reponseJson = json_encode($reponse);
+        if ($reponseJson === false) {
             die('json encode ERROR : ' . json_last_error_msg());
         }
-        echo $json_response;
+        echo $reponseJson;
     }
 
 ?>

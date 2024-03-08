@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-require("../db/DAOconsultations.php");
+require("../db/DAOmedecins.php");
 require("../authapi/authapi.php");
 
 $pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
@@ -9,25 +9,25 @@ switch ($http_method) {
     case "GET":
         if (isset($_GET["id"])) {
             $id = $_GET["id"];
-            if (!empty($consultation = getConsultationById($pdo, $id))) {
-                fournirReponse("Succes", 200, "Consultation d'ID : ".$id." récuperée", $consultation);
+            if (!empty($medecin = getMedecinById($pdo, $id))) {
+                fournirReponse("Succes", 200, "Medecin d'ID : ".$id." récuperé", $medecin);
             } else {
-                fournirReponse("Erreur", 400, "Consultation d'ID : ".$id." inexistante");
+                fournirReponse("Erreur", 400, "Medecin d'ID : ".$id." inexistant");
             }
-        } else if (!isset($_GET["idMedecin"]) &&
-            !isset($_GET["idUsager"]) &&
-            !isset($_GET["dateConsultation"])) {
-            if (!empty($consultations = getConsultations($pdo, null, null, null))) {
-                fournirReponse("Succes", 200, "Toutes les consultations récuperées", $consultations);
-            } else {
-                fournirReponse("Erreur", 400, "Aucune consultation récuperée");
-            }
+        } else if (!isset($_GET["civilite"]) &&
+            !isset($_GET["nom"]) &&
+            !isset($_GET["prenom"])) {
+                if (!empty($medecin = getMedecins($pdo, null, null, null, null))) {
+                    fournirReponse("Succes", 200, "Tous les médecins récuperés", $consultations);
+                } else {
+                    fournirReponse("Erreur", 400, "Aucun médecin récuperé");
+                }
         } else {
-            $idMedecin = isset($_GET["idMedecin"]) ? $_GET["idMedecin"] : null;
-            $idUsager = isset($_GET["idUsager"]) ? $_GET["idUsager"] : null;
-            $dateConsultation = isset($_GET["dateConsultation"]) ? $_GET["dateConsultation"] : null;
-            if (!empty($consultationsFiltrees = getConsultations($pdo, $idMedecin, $idUsager, $dateConsultation))) {
-                fournirReponse("Succes", 200, "Consultations filtrées récuperées", $consultationsFiltrees);
+            $civilite = isset($_GET["civilite"]) ? $_GET["civilite"] : null;
+            $nom = isset($_GET["nom"]) ? $_GET["nom"] : null;
+            $prenom = isset($_GET["prenom"]) ? $_GET["prenom"] : null;
+            if ($medecinsFiltres = getMedecins($pdo, $idMedecin, $idUsager, $dateConsultation)) {
+                fournirReponse("Succes", 200, "Consultations filtrées récuperées", $medecinsFiltres);
             }
         }
         break;
@@ -121,5 +121,3 @@ switch ($http_method) {
         }
         break;
 }
-
-    

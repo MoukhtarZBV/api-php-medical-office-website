@@ -2,7 +2,7 @@
 
 require("../functions/fonctions.php");
 
-function getConsultationById(PDO $pdo, int $idConsultation) : array {
+function getConsultationById(PDO $pdo, int $idConsultation) : array | bool {
     $stmt = $pdo->prepare("SELECT * FROM consultation WHERE idConsultation = ?");
     if (!$stmt) {
         return array();
