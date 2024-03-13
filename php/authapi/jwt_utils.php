@@ -92,4 +92,18 @@ function get_role($jwt) {
 	return json_decode($payload)->role;
 }
 
+function fournirReponse(string $statut, string $statutCode, string $statutMessage, mixed $donnees = null) : void {
+	http_response_code($statutCode);
+	header("Content-Type:application/json; charset=utf-8");
+	$reponse['statut'] = $statut;
+	$reponse['statutCode'] = $statutCode;
+	$reponse['statutMessage'] = $statutMessage;
+	$reponse['donnees'] = $donnees;
+	$reponseJson = json_encode($reponse);
+	if ($reponseJson === false) {
+		die('json encode ERROR : ' . json_last_error_msg());
+	}
+	echo $reponseJson;
+}
+
 ?>

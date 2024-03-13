@@ -63,6 +63,8 @@ switch ($http_method) {
                 } else {
                     fournirReponse("Erreur", 400, "Aucune consultation supprimée");
                 }
+            } else {
+                fournirReponse("Erreur", 400, "Paramètre ID non spécifié");
             }
         } else {
             fournirReponse("Erreur", 400, "Jeton invalide");
@@ -77,8 +79,8 @@ switch ($http_method) {
                 (!empty($data["heure"]) ||
                 !empty($data["duree"]))) {
                 $id = $_GET["id"];
-                $heure = isset($data["heure"]) ? $data["heure"] : null;
-                $duree = isset($data["duree"]) ? $data["duree"] : null;
+                $heure = $data["heure"] ?? null;
+                $duree = $data["duree"] ?? null;
                 if (editConsultation($pdo, $id, $heure, $duree)) {
                     $consultation = getConsultationById($pdo, $id);
                     fournirReponse("Succes", 200, "Consultation d'ID : ".$id." modifiée", $consultation);
@@ -103,8 +105,8 @@ switch ($http_method) {
                 (!empty($data["heure"]) &&
                 !empty($data["duree"]))) {
                 $id = $_GET["id"];
-                $heure = isset($data["heure"]) ? $data["heure"] : null;
-                $duree = isset($data["duree"]) ? $data["duree"] : null;
+                $heure = $data["heure"];
+                $duree = $data["duree"];
                 if (editConsultation($pdo, $id, $heure, $duree)) {
                     $consultation = getConsultationById($pdo, $id);
                     fournirReponse("Succes", 200, "Consultation d'ID : ".$id." intégralement modifiée", $consultation);

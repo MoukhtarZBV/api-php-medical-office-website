@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 require("../db/DAOmedecins.php");
-require("../authapi/authapi.php");
+require("../authapi/jwt_utils.php");
 
 $pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
 $http_method = $_SERVER['REQUEST_METHOD'];
@@ -17,8 +17,8 @@ switch ($http_method) {
         } else if (!isset($_GET["civilite"]) &&
             !isset($_GET["nom"]) &&
             !isset($_GET["prenom"])) {
-                if (!empty($medecin = getMedecins($pdo, null, null, null, null))) {
-                    fournirReponse("Succes", 200, "Tous les médecins récuperés", $consultations);
+                if (!empty($medecin = getMedecins($pdo, null, null, null))) {
+                    fournirReponse("Succes", 200, "Tous les médecins récuperés", $medecin);
                 } else {
                     fournirReponse("Erreur", 400, "Aucun médecin récuperé");
                 }
@@ -26,7 +26,7 @@ switch ($http_method) {
             $civilite = isset($_GET["civilite"]) ? $_GET["civilite"] : null;
             $nom = isset($_GET["nom"]) ? $_GET["nom"] : null;
             $prenom = isset($_GET["prenom"]) ? $_GET["prenom"] : null;
-            if ($medecinsFiltres = getMedecins($pdo, $idMedecin, $idUsager, $dateConsultation)) {
+            if ($medecinsFiltres = getMedecins($pdo, $civilite, $nom, $prenom)) {
                 fournirReponse("Succes", 200, "Consultations filtrées récuperées", $medecinsFiltres);
             }
         }
@@ -36,19 +36,17 @@ switch ($http_method) {
         if ($jwt && is_jwt_valid($jwt, 'secret')) {
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
-            if (!empty($arguments["idMedecin"]) &&
-                !empty($arguments["idUsager"]) &&
-                !empty($arguments["date"]) &&
-                !empty($arguments["heure"]) &&
-                !empty($arguments["duree"])) {
-                    if ($id = addConsultation($pdo, $arguments["idMedecin"], $arguments["idUsager"], $arguments["date"], $arguments["heure"], $arguments["duree"])) {
-                        $consultation = getConsultationById($pdo, $id);
-                        fournirReponse("Succes", 200, "Consultation créée", [$consultation]);
+            if (!empty($arguments["civilite"]) &&
+                !empty($arguments["nom"]) &&
+                !empty($arguments["prenom"])) {
+                    if ($id = addMedecin($pdo, $arguments["civilite"], $arguments["nom"], $arguments["prenom"])) {
+                        $medecin = getMedecinById($pdo, $id);
+                        fournirReponse("Succes", 200, "Médecin crée", $medecin);
                     } else {
-                        fournirReponse("Erreur", 400, "Erreur lors de la création de la consultation");
+                        fournirReponse("Erreur", 400, "Erreur lors de la création du médecin");
                     }
             } else {
-                fournirReponse("Erreur", 400, "Création consultation impossible, tous les champs ne sont pas renseignés");
+                fournirReponse("Erreur", 400, "Création médecin impossible, tous les champs ne sont pas renseignés");
             }
         } else {
             fournirReponse("Erreur", 400, "Jeton invalide");
@@ -58,11 +56,13 @@ switch ($http_method) {
         $jwt = get_bearer_token();
         if ($jwt && is_jwt_valid($jwt, 'secret')) {
             if (!empty($_GET["id"])) {
-                if (deleteConsultation($pdo, $_GET["id"])) {
-                    fournirReponse("Succes", 200, "Consultation n°".$_GET["id"]." supprimée");
+                if (deleteMedecin($pdo, $_GET["id"])) {
+                    fournirReponse("Succes", 200, "Médecin n°".$_GET["id"]." supprimé");
                 } else {
-                    fournirReponse("Erreur", 400, "Aucune consultation supprimée");
+                    fournirReponse("Erreur", 400, "Aucun médecin supprimé");
                 }
+            } else {
+                fournirReponse("Erreur", 400, "Paramètre ID non spécifié");
             }
         } else {
             fournirReponse("Erreur", 400, "Jeton invalide");
@@ -74,16 +74,18 @@ switch ($http_method) {
             $postedData = file_get_contents('php://input');
             $data = json_decode($postedData,true); 
             if (!empty($_GET["id"]) && 
-                (!empty($data["heure"]) ||
-                !empty($data["duree"]))) {
+                (!empty($data["civilite"]) ||
+                !empty($data["nom"]) || 
+                !empty($data["prenom"]))) {
                 $id = $_GET["id"];
-                $heure = isset($data["heure"]) ? $data["heure"] : null;
-                $duree = isset($data["duree"]) ? $data["duree"] : null;
-                if (editConsultation($pdo, $id, $heure, $duree)) {
-                    $consultation = getConsultationById($pdo, $id);
-                    fournirReponse("Succes", 200, "Consultation d'ID : ".$id." modifiée", $consultation);
+                $civilite = $data["civilite"] ?? null;
+                $nom = $data["nom"] ?? null;
+                $prenom = $data["prenom"] ?? null;
+                if (editMedecin($pdo, $id, $civilite, $nom, $prenom)) {
+                    $medecin = getMedecinById($pdo, $id);
+                    fournirReponse("Succes", 200, "Médecin d'ID : ".$id." modifié", $medecin);
                 } else {
-                    fournirReponse("Erreur", 400, "Consultation d'ID : ".$id." inchangée");
+                    fournirReponse("Erreur", 400, "Médecin d'ID : ".$id." inchangé");
                 }
             } else if (empty($_GET["id"])) {
                 fournirReponse("Erreur", 400, "Paramètre ID non spécifié");
@@ -100,16 +102,18 @@ switch ($http_method) {
             $postedData = file_get_contents('php://input');
             $data = json_decode($postedData,true); 
             if (!empty($_GET["id"]) && 
-                (!empty($data["heure"]) &&
-                !empty($data["duree"]))) {
+                (!empty($data["civilite"]) &&
+                !empty($data["nom"]) &&
+                !empty($data["prenom"]))) {
                 $id = $_GET["id"];
-                $heure = isset($data["heure"]) ? $data["heure"] : null;
-                $duree = isset($data["duree"]) ? $data["duree"] : null;
-                if (editConsultation($pdo, $id, $heure, $duree)) {
-                    $consultation = getConsultationById($pdo, $id);
-                    fournirReponse("Succes", 200, "Consultation d'ID : ".$id." intégralement modifiée", $consultation);
+                $civilite = $data["civilite"];
+                $nom = $data["nom"];
+                $prenom = $data["prenom"];
+                if (editMedecin($pdo, $id, $civilite, $nom, $prenom)) {
+                    $medecin = getMedecinById($pdo, $id);
+                    fournirReponse("Succes", 200, "Médecin d'ID : ".$id." intégralement modifié", $medecin);
                 } else {
-                    fournirReponse("Erreur", 400, "Consultation d'ID : ".$id." inchangée");
+                    fournirReponse("Erreur", 400, "Médecin d'ID : ".$id." inchangé");
                 }
             } else if (empty($_GET["id"])) {
                 fournirReponse("Erreur", 400, "Paramètre ID non spécifié");

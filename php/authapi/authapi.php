@@ -16,7 +16,7 @@
         if (getUser($pdo,$data['login'],$data['password'])) {
             $user = getUser($pdo,$data['login'],$data['password']);
             $headers = array('alg'=>('HS256'),'typ'=>'JWT');
-            $payload = array('login'=>$data['login'], 'exp'=>(time()+60), 'role'=>$user['role']);
+            $payload = array('login'=>$data['login'], 'exp'=>(time()+1980), 'role'=>$user['role']);
             $jwt = generate_jwt($headers,$payload,"secret");
             fournirReponse("Succes", 200, "Login réussi", $jwt);
         } else {
@@ -37,18 +37,6 @@
             
     }
 
-    function fournirReponse(string $statut, string $statutCode, string $statutMessage, mixed $donnees = null) : void {
-        http_response_code($statutCode);
-        header("Content-Type:application/json; charset=utf-8");
-        $reponse['statut'] = $statut;
-        $reponse['statutCode'] = $statutCode;
-        $reponse['statutMessage'] = $statutMessage;
-        $reponse['donnees'] = $donnees;
-        $reponseJson = json_encode($reponse);
-        if ($reponseJson === false) {
-            die('json encode ERROR : ' . json_last_error_msg());
-        }
-        echo $reponseJson;
-    }
+    
 
 ?>
