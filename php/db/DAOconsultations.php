@@ -2,6 +2,15 @@
 
 require("../functions/fonctions.php");
 
+/**
+ * Récupérer une consultation par son identifiant 
+ * 
+ * @param PDO $pdo              le pdo reliant à la bdd
+ * @param int $idConsultation   l'id à rechercher 
+ * 
+ * @return array|bool renvoie l'array correspondant à la consultation
+ *                    OU le booléen false/un array vide s'il y a eu une erreur 
+ */
 function getConsultationById(PDO $pdo, int $idConsultation) : array | bool {
     $stmt = $pdo->prepare("SELECT * FROM consultation WHERE idConsultation = ?");
     if (!$stmt) {
@@ -13,6 +22,17 @@ function getConsultationById(PDO $pdo, int $idConsultation) : array | bool {
     return array();
 }
 
+/**
+ * Récupérer toutes les consultations possiblement filtrées
+ * 
+ * @param PDO           $pdo        le pdo reliant à la bdd
+ * @param int|null      $idMédecin  l'id du médecin potentiel
+ * @param int|null      $idUsager   l'id du patient potentiel 
+ * @param string|null   $date       la potentielle date
+ * 
+ * @return array renvoie la liste de toutes les consultations, possiblement filtrées si
+ *               des filtres ont été renseignés
+ */
 function getConsultations(PDO $pdo, int | null $idMedecin, int | null $idUsager, string | null $date) : array {
     $reqConsultations = "SELECT idConsultation,
                                 CONCAT(m.nom, ' ', m.prenom) as nomMedecin, 
@@ -50,6 +70,18 @@ function getConsultations(PDO $pdo, int | null $idMedecin, int | null $idUsager,
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+/**
+ * Ajouter une consultation à la bdd 
+ * 
+ * @param PDO $pdo          Le pdo reliant à la bdd
+ * @param int $idMedecin    l'identifiant du médecin s'occupant de la consultation
+ * @param int $idUsager     l'identifiant de l'usager concerné par la consultation
+ * @param string $date      la date de la consultation
+ * @param string $heure     l'heure de la consultation
+ * @param string $duree     la durée de la consultation
+ * 
+ * @return int|null renvoie l'identifiant de la consultation ajoutée OU null si rien n'a été ajouté 
+ */
 function addConsultation(PDO $pdo, int $idMedecin, int $idUsager, string $date, string $heure, string $duree) : int | null {
     $stmt = $pdo->prepare("INSERT INTO consultation(idMedecin, dateConsultation, heureDebut, duree, idUsager) VALUES (?, ?, ?, ?, ?)");
     if (!$stmt) {
@@ -62,6 +94,14 @@ function addConsultation(PDO $pdo, int $idMedecin, int $idUsager, string $date, 
     return $idConsultation;
 }
 
+/**
+ * Supprime une consultation de la bdd 
+ * 
+ * @param PDO $pdo              le pdo reliant à la bdd
+ * @param int $idConsultation   l'identifiant de la consultation à supprimer
+ * 
+ * @return bool renvoie un booléen indiquant si la suppression a eu lieu 
+ */
 function deleteConsultation(PDO $pdo, int $idConsultation) : bool {
     $stmt = $pdo->prepare("DELETE FROM consultation WHERE idConsultation = ?");
     if (!$stmt) {
@@ -73,7 +113,16 @@ function deleteConsultation(PDO $pdo, int $idConsultation) : bool {
     return false;
 }
 
+/**
+ * Modifie une consultation (REMARQUE: on ne peut modifier que l'heure et la durée d'une consultation)
+ * 
+ * @param PDO $pdo              le pdo reliant à la bdd
+ * @param int $idConsultation   l'identifiant de la consultation à modifier 
+ * @param int|null $heure       l'heure à potentiellement modifer
+ * @param int|null $duree       la durée à potentiellement modifier 
+ */
 function editConsultation(PDO $pdo, int $idConsultation, int | null $heure, int | null $duree) : bool {
+
     $sql = "UPDATE consultation SET ";
 
     $arguments = array();
