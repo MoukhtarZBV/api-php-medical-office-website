@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 require("../db/DAOusagers.php");
-require("../authapi/jwt_utils.php");
+require("utilitairesAPI.php");
 
 $pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
 $http_method = $_SERVER['REQUEST_METHOD'];
@@ -25,10 +25,10 @@ switch ($http_method) {
         } else if (!isset($_GET["civilite"]) && !isset($_GET["nom"]) && 
             !isset($_GET["prenom"]) && !isset($_GET["numeroSecuriteSociale"])) {
 
-            if (!empty($usagers = getUsagers($pdo, null, null, null, null, null))) {
+            if (!empty($usagers = getUsagers($pdo, null, null, null, null))) {
                 fournirReponse("Succes", 200, "Tous les usagers récuperés", $usagers);
             } else {
-                fournirReponse("Erreur", 404, "Aucun usager récuperé");
+                fournirReponse("Erreur", 404, "Aucun usager trouvé");
             }
 
         //si au moins un id de recherche a été spécifié, recherche par filtrage
@@ -39,8 +39,10 @@ switch ($http_method) {
             $prenom = isset($_GET["prenom"]) ? $_GET["prenom"] : null;
             $numSS = isset($_GET["numeroSecuriteSociale"]) ? $_GET["numeroSecuriteSociale"] : null;
 
-            if ($usagersFiltres = getUsagers($pdo, null, $civilite, $nom, $prenom, $numSS)) {
+            if ($usagersFiltres = getUsagers($pdo, $civilite, $nom, $prenom, $numSS)) {
                 fournirReponse("Succes", 200, "Usagers filtrés récuperés", $usagersFiltres);
+            } else {
+                fournirReponse("Erreur", 400, "Une erreur est survenue : les usagers filtrés n'ont pas pu être récupérés");
             }
 
         }
@@ -51,7 +53,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
 
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
@@ -77,7 +79,7 @@ switch ($http_method) {
                     }
 
             } else {
-                fournirReponse("Erreur", 400, "Création d'usager impossible, tous les champs ne sont pas renseignés");
+                fournirReponse("Erreur", 422, "Création d'usager impossible, tous les champs ne sont pas renseignés");
             }
 
         } else {
@@ -90,7 +92,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
 
             //vérification de la présence de l'identifiant dans la requête 
             if (!empty($_GET["id"])) {
@@ -100,7 +102,7 @@ switch ($http_method) {
                     fournirReponse("Erreur", 400, "Une erreur est survenue : l'usager n'a pas été supprimé");
                 }
             } else {
-                fournirReponse("Erreur", 400, "Identifiant de l'usager non renseigné");
+                fournirReponse("Erreur", 422, "Identifiant de l'usager non renseigné");
             }
 
         } else {
@@ -113,7 +115,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
 
             $postedData = file_get_contents('php://input');
             $arguments = json_decode($postedData,true); 
@@ -147,9 +149,9 @@ switch ($http_method) {
                 }
 
             } else if (empty($_GET["id"])) {
-                fournirReponse("Erreur", 400, "Identifiant de l'usager non spécifié");
+                fournirReponse("Erreur", 422, "Identifiant de l'usager non spécifié");
             } else {
-                fournirReponse("Erreur", 400, "Au moins un paramètre doit être saisi");
+                fournirReponse("Erreur", 422, "Au moins un paramètre doit être saisi");
             }
         } else {
             fournirReponse("Erreur", 401, "Jeton invalide");
@@ -160,7 +162,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
 
             $postedData = file_get_contents('php://input');
             $arguments = json_decode($postedData,true); 
@@ -193,9 +195,9 @@ switch ($http_method) {
             }
 
         } else if (empty($_GET["id"])) {
-            fournirReponse("Erreur", 400, "Paramètre ID non spécifié");
+            fournirReponse("Erreur", 422, "Paramètre ID non spécifié");
         } else {
-            fournirReponse("Erreur", 400, "Tous les paramètres doivent être saisis dans un PUT.");
+            fournirReponse("Erreur", 422, "Tous les paramètres doivent être saisis dans un PUT.");
         }
 
     } else {
