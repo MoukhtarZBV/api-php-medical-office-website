@@ -1,7 +1,7 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 require("../db/DAOconsultations.php");
-require("../authapi/authapi.php");
+require("utilitairesAPI.php");
 
 $pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
 $http_method = $_SERVER['REQUEST_METHOD'];
@@ -33,7 +33,7 @@ switch ($http_method) {
         break;
     case "POST":
         $jwt = get_bearer_token();
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
             if (!empty($arguments["idMedecin"]) &&
@@ -56,7 +56,7 @@ switch ($http_method) {
         break;
     case "DELETE":
         $jwt = get_bearer_token();
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
             if (!empty($_GET["id"])) {
                 if (deleteConsultation($pdo, $_GET["id"])) {
                     fournirReponse("Succes", 200, "Consultation n°".$_GET["id"]." supprimée");
@@ -72,7 +72,7 @@ switch ($http_method) {
         break;
     case "PATCH":
         $jwt = get_bearer_token();
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
             $postedData = file_get_contents('php://input');
             $data = json_decode($postedData,true); 
             if (!empty($_GET["id"]) && 
@@ -98,7 +98,7 @@ switch ($http_method) {
         break;
     case "PUT":
         $jwt = get_bearer_token();
-        if ($jwt && is_jwt_valid($jwt, 'secret')) {
+        if ($jwt && jetonValide($jwt)) {
             $postedData = file_get_contents('php://input');
             $data = json_decode($postedData,true); 
             if (!empty($_GET["id"]) && 

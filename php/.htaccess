@@ -1,0 +1,4 @@
+
+Options +FollowSymlinks
+RewriteEngine on
+RewriteRule ^medecins$ /api-php-medical-office-website/php/ressourcesapi/APImedecins.php [L,R=301]

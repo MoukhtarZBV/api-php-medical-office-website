@@ -1,0 +1,7 @@
+Options +FollowSymlinks
+RewriteEngine on
+RewriteRule ^medecins$ /api-php-medical-office-website/php/ressourcesapi/APImedecins.php [L,R=301]
+RewriteRule ^usagers$ /api-php-medical-office-website/php/ressourcesapi/APIusagers.php [L,R=301]
+RewriteRule ^consultations$ /api-php-medical-office-website/php/ressourcesapi/APIconsultations.php [L,R=301]
+
+RewriteRule ^medecins/([^/]+)/?$ /api-php-medical-office-website/php/ressourcesapi/APImedecins.php?id=$1 [QSA,L]
