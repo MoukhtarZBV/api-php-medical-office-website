@@ -42,7 +42,7 @@ switch ($http_method) {
             if ($usagersFiltres = getUsagers($pdo, $civilite, $nom, $prenom, $numSS)) {
                 fournirReponse("Succes", 200, "Usagers filtrés récuperés", $usagersFiltres);
             } else {
-                fournirReponse("Erreur", 400, "Une erreur est survenue : les usagers filtrés n'ont pas pu être récupérés");
+                fournirReponse("Erreur", 404, "Aucun usager trouvé correspondant à vos filtres");
             }
 
         }
