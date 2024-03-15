@@ -9,19 +9,28 @@ require("../functions/fonctions.php");
  * @param PDO $pdo      le pdo de la connexion à la bdd
  * @param int $idUsager l'identifiant de l'usager à trouver
  * 
- * @return array        l'usager trouvé OU un array vide s'il y a une erreur 
+ * @return array|null        un array décrivant l'usager trouvé OU null s'il y a eu une erreur 
  */
-function getUsagerById(PDO $pdo, int $idUsager) : array {
+function getUsagerById(PDO $pdo, int $idUsager) : array|null {
+
+    //préparation de la requête 
     $stmt = $pdo->prepare("SELECT * FROM usager WHERE idUsager = ?");
     if (!$stmt) {
         return array();
     }
-    if ($stmt->execute([$idUsager])) {
+
+    //exécution de la requête
+    try {
+        $stmt->execute([$idUsager]);
         if ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
             return $res;
+        } else {
+            return array();
         }
+    } catch(PDOException $Exception) {
+        return null;
     }
-    return array();
+    
 }
 
 /**
@@ -34,15 +43,16 @@ function getUsagerById(PDO $pdo, int $idUsager) : array {
  * @param string|null $prenom   le potentiel prénom de l'usager
  * @param string|null $numSS    le potentiel numéro de sécurité sociale de l'usager
  * 
- * @return array|bool renvoie l'array de tous les usagers ou faux s'il y a eu une erreur 
+ * @return array|bool renvoie l'array de tous les usagers OU null s'il y a eu une erreur 
  * 
  */
 function getUsagers(PDO $pdo, string | null $civilite, string | null $nom, 
-string | null $prenom, string | null $numSS) : array | bool {
+string | null $prenom, string | null $numSS) : array | null {
 
+    //déclaration de la requête 
     $sql = "SELECT * FROM usager";
 
-    // Recherche en fonction des filtres
+    // ajout de potentiels filtres de recherche  
     $criteres = ["civilite" => $civilite, "nom" => $nom, "prenom" => $prenom, "numeroSecuriteSociale" => $numSS];
     $arguments = array();
     $unCritere = false;
@@ -54,15 +64,14 @@ string | null $prenom, string | null $numSS) : array | bool {
         }
     }
         
-    //Exécutuion du DAO
-    $stmt = $pdo->prepare($sql);
-    if (!$stmt) {
-        return false;
-    }
-    if ($stmt->execute($arguments)) {
+    //Exécutuion de la requête 
+
+    try {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($arguments);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    } else {
-        return false;
+    } catch(PDOException $Exception ) {
+        return null;
     }
 
 }
@@ -87,13 +96,14 @@ string | null $prenom, string | null $numSS) : array | bool {
 function addUsager(PDO $pdo, string $civilite, string $nom, string $prenom, string $adresse, string $ville,
     string $codePostal, string $numeroSecuriteSociale, string $dateNaissance, string $lieuNaissance, int | null $medecinReferent) : int | null {
 
+    //préparation de la requête
     $stmt = $pdo->prepare("INSERT INTO usager(civilite, nom, prenom, adresse, ville, codePostal, numeroSecuriteSociale, dateNaissance, lieuNaissance, medecinReferent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     if (!$stmt) {
         return null;
     }
 
-    $pdo->beginTransaction(); $idUsager = 0;
-    //récupère si la requête a été exécutée l'identifiant inséré par la requête
+     //Exécution de la requête et récupération de l'identifiant de l'usager ajouté 
+    $pdo->beginTransaction(); 
     try {
         $idUsager = $stmt->execute([$civilite, $nom, $prenom, $adresse, $ville, $codePostal, $numeroSecuriteSociale, $dateNaissance, $lieuNaissance, $medecinReferent]) ? $pdo->lastInsertId() : null;
         $pdo->commit();
@@ -115,12 +125,25 @@ function addUsager(PDO $pdo, string $civilite, string $nom, string $prenom, stri
  * @return bool renvoie un booléen indiquant si la suppression s'est faite 
  */
 
-function deleteUsager(PDO $pdo, int $idUsager) : bool {
+function deleteUsager(PDO $pdo, int $idUsager) : bool|null {
 
+    try {
+        //Préparation & exécution de la requête
+        $stmt = $pdo->prepare("DELETE FROM usager WHERE idUsager = ?");
+        $stmt->execute([$idUsager]);
+        return $stmt->rowCount() > 0;
+    }
+    catch(PDOException $Exception ) {
+        return null;
+    }
+
+    //Préparation de la requête
     $stmt = $pdo->prepare("DELETE FROM usager WHERE idUsager = ?");
     if (!$stmt) {
         return false;
     }
+
+    //Exécution de la requête 
     if ($stmt->execute([$idUsager])) {
         //renvoie si le nombre de suppressions faites est > à 0 
         return $stmt->rowCount() > 0;
@@ -165,6 +188,8 @@ function editUsager(PDO $pdo, int $idUsager, string | null $civilite, string | n
             $unCritere = true;
         }
     }
+
+    //ajout de la clause de recherche de l'usager
     if (!$unCritere) { return false; }
     $arguments["idUsager"] = $idUsager;
     $sql .= " WHERE idUsager = :idUsager";
@@ -174,6 +199,7 @@ function editUsager(PDO $pdo, int $idUsager, string | null $civilite, string | n
         return false;
     }
 
+    //exécution de la requête 
     return $stmt->execute($arguments);
   
 }
