@@ -18,7 +18,7 @@
         if (getUser($pdo,$data['login'],$data['password'])) {
             $user = getUser($pdo,$data['login'],$data['password']);
             $headers = array('alg'=>('HS256'),'typ'=>'JWT');
-            $payload = array('login'=>$data['login'], 'exp'=>(time()+10), 'role'=>$user['role']);
+            $payload = array('login'=>$data['login'], 'exp'=>(time()+1980), 'role'=>$user['role']);
             $jwt = generate_jwt($headers, $payload, $_SECRET_KEY);
             fournirReponse("Succes", 200, "Login réussi", $jwt);
         } else {

@@ -1,29 +1,17 @@
 <?php session_start();
-    require('fonctions.php');
+    require('../functions/appelsAPIMedecins.php');
     verifierAuthentification();
-    $pdo = creerConnexion();
 
-    // Début de la requête, on sélectionne tous les usages et leur potentiel médecin référent
-    $reqMedecins = ' SELECT * FROM Medecin';
-                    
-    // Si un nom et/ou un prénom ont été saisis
-    $arguments = array();
-    if (isset($_POST["valider"]) && !empty($_POST["valider"])) {
-        $nom = $_POST["nom"];
-        $prenom = $_POST["prenom"];
-        $reqMedecins = $reqMedecins . " WHERE lower(nom) LIKE lower(?)
-                                        AND lower(prenom) LIKE lower(?)";
-        $arguments = ["%$nom%", "%$prenom%"];
-    } 
-    $stmt = $pdo->prepare($reqMedecins);
-    verifierPrepare($stmt);
-    verifierExecute($stmt->execute($arguments));
+    // Recupère les champs qui ont été saisis
+    $civilite = $_POST["idMedecin"] ?? null;
+    $nom = $_POST["idUsager"] ?? null;
+    $prenom = $_POST["date"] ?? null;
+
+    $medecins = getMedecins($civilite, $nom, $prenom);
 
     // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
-    $table = '';
-    $nombreLignes = '';
-    if ($stmt->rowCount() > 0){
-        $nombreLignes ='<div class="nombre_lignes"><strong>'.$stmt->rowCount().'</strong> médecin(s) trouvé(s)</div>';
+    if ($medecins){
+        $nombreLignes ='<div class="nombre_lignes"><strong>'. count($medecins) .'</strong> médecin(s) trouvé(s)</div>';
         $table ='<div class="conteneur_table_affichage">
                 <table id="table_affichage">
                 <thead>
@@ -33,12 +21,12 @@
                         <th>Prenom </th>
                     </tr>
                 </thead><tbody>';
-        while ($dataMedecin = $stmt->fetch()){
-            $table = $table . '<tr><td>'.$dataMedecin['civilite'].'</td>'. 
-                    '<td>'.$dataMedecin['nom'].'</td>'.
-                    '<td>'.$dataMedecin['prenom'].'</td>'.                    
-                    '<td>'.'<a href = \'modificationMedecin.php?idMedecin='.$dataMedecin[0].'\'><img src="Images/modifier.png" alt=""width=30px></img></a>'.'</td>'.
-                    '<td>'.'<a href = \'suppression.php?id='.$dataMedecin[0].'&type=medecin\'><img src="Images/supprimer.png" alt=""width=30px></img></a>'.'</td>'.'</tr>';
+        foreach ($medecins as $medecin){
+            $table = $table . '<tr><td>'.$medecin['civilite'].'</td>'. 
+                    '<td>'.$medecin['nom'].'</td>'.
+                    '<td>'.$medecin['prenom'].'</td>'.                    
+                    '<td>'.'<a href = \'modificationMedecin.php?idMedecin='.$medecin['idMedecin'].'\'><img src="Images/modifier.png" alt="" width=30px></img></a>'.'</td>'.
+                    '<td>'.'<a href = \'suppression.php?id='.$medecin['idMedecin'].'&type=medecin\'><img src="Images/supprimer.png" alt="" width=30px></img></a>'.'</td>'.'</tr>';
         }
         $table =$table . '</tbody></table></div>';
     } else {
@@ -50,7 +38,7 @@
 
 <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../../css/style.css">
     <link rel="stylesheet" href="header.css">
     <title> Médecins </title>
 </head>

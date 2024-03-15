@@ -1,7 +1,6 @@
 <?php session_start();
-    require('fonctions.php');
-    verifierAuthentification();
-    $pdo = creerConnexion();
+    require('php/functions/fonctions.php');
+    verifierAuthentification(); 
 ?>
 <!DOCTYPE HTML>
 <html>

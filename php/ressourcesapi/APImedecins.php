@@ -26,8 +26,11 @@ switch ($http_method) {
             $civilite = isset($_GET["civilite"]) ? $_GET["civilite"] : null;
             $nom = isset($_GET["nom"]) ? $_GET["nom"] : null;
             $prenom = isset($_GET["prenom"]) ? $_GET["prenom"] : null;
-            if ($medecinsFiltres = getMedecins($pdo, $civilite, $nom, $prenom)) {
+            $medecinsFiltres = getMedecins($pdo, $civilite, $nom, $prenom);
+            if (is_array($medecinsFiltres)) {
                 fournirReponse("Succes", 200, "Consultations filtrées récuperées", $medecinsFiltres);
+            } else {
+                fournirReponse("Erreur", 400, "Aucun médecin récuperé");
             }
         }
         break;

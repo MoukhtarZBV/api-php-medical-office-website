@@ -13,7 +13,7 @@ function getConsultationById(PDO $pdo, int $idConsultation) : array | bool {
     return array();
 }
 
-function getConsultations(PDO $pdo, int | null $idMedecin, int | null $idUsager, string | null $date) : array {
+function getConsultations(PDO $pdo, int | null $idMedecin, int | null $idUsager, string | null $date) : array | false {
     $reqConsultations = "SELECT idConsultation,
                                 CONCAT(m.nom, ' ', m.prenom) as nomMedecin, 
                                 CONCAT(u.nom, ' ', u.prenom) as nomUsager,

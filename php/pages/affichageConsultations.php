@@ -1,21 +1,19 @@
 <?php session_start();
-    require('fonctions.php');
+    require('../functions/appelsAPIConsultations.php');
+    require('../functions/balisesDynamiques.php');
     verifierAuthentification();
-    $pdo = creerConnexion();
+    
+    // Recupère les champs qui ont été saisis
+    $idMedecin = $_POST["idMedecin"] ?? null;
+    $idUsager = $_POST["idUsager"] ?? null;
+    $date = $_POST["date"] ?? null;
 
-    $idMedecin = '';
-    $idUsager = '';
-    if (isset($_POST["valider"])) {
-        $idMedecin = $_POST["idMedecin"];
-        $idUsager = $_POST["idUsager"];
-        $date = $_POST["date"];
-    }
+    // Appel à l'API pour récupérer les consultations, filtrées ou non
+    $consultations = getConsultations($idMedecin, $idUsager, $date);
 
-    // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
-    $table = '';
-    $nombreLignes = '';
-    if ($stmt->rowCount() > 0) {
-        $nombreLignes = '<div class="nombre_lignes"><strong>' . $stmt->rowCount() . '</strong> consultation(s) trouvée(s)</div>';
+    // Affichage de toutes les consultations renvoyées
+    if ($consultations) {
+        $nombreLignes = '<div class="nombre_lignes"><strong>' . count($consultations) . '</strong> consultation(s) trouvée(s)</div>';
         $table = '<div class="conteneur_table_affichage">
                     <table id="table_affichage">
                                 <thead>
@@ -27,15 +25,15 @@
                                         <th>Durée de consultation</th>
                                     </tr>
                                 </thead><tbody>';
-        while ($dataConsultation = $stmt->fetch()) {
-            $dateFormatee = formaterDate($dataConsultation['dateConsultation']);
-            $table = $table . '<tr><td>' . $dataConsultation['nomMed'] . '</td>' .
-                '<td>' . $dataConsultation['nomUsager'] . '</td>' .
+        foreach ($consultations as $consultation) {
+            $dateFormatee = formaterDate($consultation['dateConsultation']);
+            $table = $table . '<tr><td>' . $consultation['nomMedecin'] . '</td>' .
+                '<td>' . $consultation['nomUsager'] . '</td>' .
                 '<td>' . $dateFormatee . '</td>' .
-                '<td>' . str_replace(':', 'H', substr($dataConsultation['heureDebut'], 0, 5)) . '</td>' .
-                '<td>' . str_replace(':', 'H', substr($dataConsultation['duree'], 0, 5)) . '</td>' .
-                '<td>' . '<a href = \'modificationConsultation.php?id=' . $dataConsultation['cle'] . '\'><img src="Images/modifier.png" alt=""width=30px></a></td>' .
-                '<td>' . '<a href = \'suppression.php?id=' . $dataConsultation['cle'] . '&type=consultation\'><img src="Images/supprimer.png" alt=""width=30px></a></td></tr>';
+                '<td>' . str_replace(':', 'H', substr($consultation['heureDebut'], 0, 5)) . '</td>' .
+                '<td>' . str_replace(':', 'H', substr($consultation['duree'], 0, 5)) . '</td>' .
+                '<td>' . '<a href = \'modificationConsultation.php?id=' . $consultation['idConsultation'] . '\'><img src="Images/modifier.png" alt=""width=30px></a></td>' .
+                '<td>' . '<a href = \'suppression.php?id=' . $consultation['idConsultation'] . '&type=consultation\'><img src="Images/supprimer.png" alt=""width=30px></a></td></tr>';
         }
         $table = $table . '</tbody></table></div>';
     } else {
@@ -47,24 +45,25 @@
 
 <head>
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="style.css">
+    <base href="<?php echo $GLOBALS['urlRoot']; ?>">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/style.css">
     <title> Consultations </title>
 </head>
 
 <body>
-    <?php include 'header.html' ?>
+    <?php include '../../header.html' ?>
     
     <main class="main_affichage">
         <h1> Liste des consultations </h1>
 
         <form class="formulaire_table" method="post" action="affichageConsultations.php">
             <div class="colonne_formulaire large">
-                Médecin <?php creerComboboxMedecins($pdo, $idMedecin, 'Tous les médecins'); ?>
+                Médecin <?php creerComboboxMedecins($idMedecin, 'Tous les médecins'); ?>
             </div>
             <div class="colonne_formulaire large">
                 Patient 
-                    <?php creerComboboxUsagers($pdo, $idUsager, 'Tous les usagers'); ?>
+                    <?php creerComboboxUsagers($idUsager, 'Tous les usagers'); ?>
             </div>
             <div class="colonne_formulaire petit">
                 Date consultation <input type="date" name="date" value="<?php echo $date ?>">
@@ -76,6 +75,7 @@
                 </a>
             </div>
         </form>
+        <!-- Affichage des consultations trouvées, avec le nombre de consultations -->
         <?php echo $nombreLignes; if (!empty($table)) { echo $table; } ?>
     </main>
 </body>

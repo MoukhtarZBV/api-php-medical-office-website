@@ -1,19 +1,29 @@
 <?php
+
+    enum RetourAPI {
+        case SUCCES;
+        case AUCUNE_LIGNE;
+        case ERREUR;
+    }
+
+    $urlRoot = "http://localhost/api-php-medical-office-website/";
+    $urlAPI = "http://localhost/api-php-medical-office-website/php/ressourcesapi/";
+    $urlAPIMedecins = $urlAPI . 'APImedecins.php';
+    $urlAPIUsagers = $urlAPI . 'APIusagers.php';
+    $urlAPIConsultations = $urlAPI . 'APIconsultations.php';
+
+    function returnStatut($code, $donnees) {
+        if (200 <= $code && $code < 300) {
+            return $donnees;
+        } else {
+            return 0;
+        }
+    }
+
     function verifierAuthentification(){
         if (!isset($_SESSION['utilisateur']) || empty($_SESSION['utilisateur'])){
             header('Location: authentification.php'); exit();
         }
-    }
-
-    function creerConnexion(){
-        $pdo = null;
-        try {
-            $pdo = new PDO('mysql:host=localhost;dbname=cabinetmed;charset=utf8', 'root', '');
-        } catch (Exception $e) {
-            echo ("Erreur ".$e);
-            exit();
-        }
-        return $pdo;
     }
 
     function verifierPrepare($stmt){
@@ -55,38 +65,20 @@
         return false;
     }
 
-    function creerComboboxUsagers($pdo, $idUsager, $message) {
-        $stmt = $pdo->prepare("SELECT idUsager, numeroSecuriteSociale, civilite, nom, prenom, medecinReferent FROM usager ORDER BY nom, prenom ASC");
-        verifierPrepare($stmt);
-        verifierExecute($stmt->execute());
-        echo '<select name="idUsager" id="combobox_usagers">';
-        if ($message != null){
-            echo '<option value="">' . $message . '</option>';
+    function ajouterParamsURL(string | null $civilite, string | null $nom, string | null $prenom) : string {
+        $url = "";
+        $premierFiltre = true;
+        if (!empty($civilite)) {
+            $url .= ($premierFiltre ? '?' : '&') . 'civilite=' . $civilite;
+            $premierFiltre = false;
         }
-        while ($dataUsager = $stmt->fetch()) {
-            $id = $dataUsager["idUsager"];
-            $titre = str_pad($dataUsager["civilite"] . '. ', 5, ' ') . $dataUsager["nom"] . ' ' . $dataUsager["prenom"] . ' (' . $dataUsager["numeroSecuriteSociale"] . ')';
-            $selected = $idUsager == $id ? 'selected' : '';
-            echo '<option value=' . $id . ' ' . $selected . ' data-idMedecinRef=' . $dataUsager["medecinReferent"] . '> ' . $titre . '</option>';
+        if (!empty($nom)) {
+            $url .= ($premierFiltre ? '?' : '&') . 'nom=' . $nom;
+            $premierFiltre = false;
         }
-        echo '</select>';
-    } 
-
-    function creerComboboxMedecins($pdo, $idMedecin, $message) {
-        $stmt = $pdo->prepare("SELECT idMedecin, civilite, nom, prenom FROM medecin");
-        verifierPrepare($stmt);
-        verifierExecute($stmt->execute());
-        echo '<select name="idMedecin" id="combobox_medecins">';
-        if ($message != null){
-            echo '<option value="">' . $message . '</option>';
-        }
-        while ($dataMedecin = $stmt->fetch()) {
-            $id = $dataMedecin["idMedecin"];
-            $titre = $dataMedecin["civilite"] . '. ' . $dataMedecin["nom"] . ' ' . $dataMedecin["prenom"];
-            $selected = $idMedecin == $id ? 'selected' : '';
-            echo '<option value=' . $id . ' ' . $selected . '> ' . $titre . '</option>';
-        }
-        echo '</select>';
-    } 
-
+        if (!empty($prenom)) {
+            $url .= ($premierFiltre ? '?' : '&') . 'prenom=' . $prenom;
+        } 
+        return $url;
+    }
 ?>
