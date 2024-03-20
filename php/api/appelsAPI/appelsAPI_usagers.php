@@ -1,10 +1,10 @@
 <?php
 
-require_once('fonctions.php');
+require_once('../utils/fonctions.php');
 
-function API_getMedecins(string | null $civilite, string | null $nom, string | null $prenom) : array | int {
-    $url = $GLOBALS["urlAPIMedecins"];
-    $url .= ajouterParamsURL($civilite, $nom, $prenom);
+function API_getUsagers(string | null $nom, string | null $prenom) : array | int {
+    $url = $GLOBALS["urlAPIUsagers"];
+    $url .= ajouterParamsURL($nom, $prenom);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -15,6 +15,3 @@ function API_getMedecins(string | null $civilite, string | null $nom, string | n
     $resultat = json_decode($resultat, true);
     return returnStatut($resultat["statutCode"], $resultat["donnees"]);
 }
-
-
-

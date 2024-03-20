@@ -1,9 +1,9 @@
 <?php session_start();
-    require('../functions/appelsAPIConsultations.php');
-    require('../functions/balisesDynamiques.php');
+    require('../api/appelsAPI/appelsAPI_Consultations.php');
+    require('../utils/balisesDynamiques.php');
     verifierAuthentification();
     
-    // Recupère les champs qui ont été saisis
+    // Récupération des champs qui ont été saisis
     $idMedecin = $_POST["idMedecin"] ?? null;
     $idUsager = $_POST["idUsager"] ?? null;
     $date = $_POST["date"] ?? null;
@@ -11,7 +11,7 @@
     // Appel à l'API pour récupérer les consultations, filtrées ou non
     $consultations = getConsultations($idMedecin, $idUsager, $date);
 
-    // Affichage de toutes les consultations renvoyées
+    // Affichage de toutes les consultations récupérées
     if ($consultations) {
         $nombreLignes = '<div class="nombre_lignes"><strong>' . count($consultations) . '</strong> consultation(s) trouvée(s)</div>';
         $table = '<div class="conteneur_table_affichage">
@@ -45,9 +45,8 @@
 
 <head>
     <meta charset="utf-8" />
-    <base href="<?php echo $GLOBALS['urlRoot']; ?>">
-    <link rel="stylesheet" href="css/header.css">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../../css/header.css">
+    <link rel="stylesheet" href="../../css/style.css">
     <title> Consultations </title>
 </head>
 
@@ -57,7 +56,7 @@
     <main class="main_affichage">
         <h1> Liste des consultations </h1>
 
-        <form class="formulaire_table" method="post" action="affichageConsultations.php">
+        <form class="formulaire_table" method="post" action="#">
             <div class="colonne_formulaire large">
                 Médecin <?php creerComboboxMedecins($idMedecin, 'Tous les médecins'); ?>
             </div>
@@ -71,7 +70,7 @@
             <div class="conteneur_boutons">
                 <input type="submit" value="Rechercher" name="valider">
                 <a href="ajoutConsultation.php" class="lien_ajouter">
-                    <div class="bouton_ajouter"><img src="Images/ajouter.png" width="20px"/>Ajouter</div>
+                    <div class="bouton_ajouter"><img src="../../images/ajouter.png" width="20px"/>Ajouter</div>
                 </a>
             </div>
         </form>

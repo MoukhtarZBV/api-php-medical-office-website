@@ -1,16 +1,16 @@
 <?php session_start();
-    require('../functions/appelsAPIMedecins.php');
+    require('../api/appelsAPI/appelsAPI_medecins.php');
     verifierAuthentification();
 
-    // Recupère les champs qui ont été saisis
-    $civilite = $_POST["idMedecin"] ?? null;
-    $nom = $_POST["idUsager"] ?? null;
-    $prenom = $_POST["date"] ?? null;
+    // Récupération des champs qui ont été saisis
+    $nom = $_POST["nom"] ?? null;
+    $prenom = $_POST["prenom"] ?? null;
 
-    $medecins = getMedecins($civilite, $nom, $prenom);
+    // Appel à l'API pour récupérer les médecins, filtrés ou non
+    $medecins = API_getMedecins($nom, $prenom);
 
-    // On affiche toutes les lignes renvoyées ou un message si rien n'a été trouvé
-    if ($medecins){
+    // Affichage de toutes les médecins récupérés
+    if ($medecins) {
         $nombreLignes ='<div class="nombre_lignes"><strong>'. count($medecins) .'</strong> médecin(s) trouvé(s)</div>';
         $table ='<div class="conteneur_table_affichage">
                 <table id="table_affichage">
@@ -39,21 +39,21 @@
 <head>
     <meta charset="utf-8" />
     <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="../../css/header.css">
     <title> Médecins </title>
 </head>
 <body>
-    <?php include 'header.html' ?>
+    <?php include '../../header.html' ?>
     
     <main class="main_affichage">
         <h1> Liste des médecins </h1>
         <div class="conteneur_table_recherche">
-            <form method="post" action="affichageMedecins.php" class="formulaire_table">
+            <form method="post" action="#" class="formulaire_table">
                 <div class="colonne_formulaire large">
-                    Nom <input type="text" name="nom" value="">
+                    Nom <input type="text" name="nom" value="<?php if (!empty($nom)) echo $nom; ?>">
                 </div>
                 <div class="colonne_formulaire large">
-                    Prénom <input type="text" name="prenom" value="">
+                    Prénom <input type="text" name="prenom" value="<?php if (!empty($prenom)) echo $prenom; ?>">
                 </div>
                 <div class="conteneur_boutons">
                     <input type="submit" value="Rechercher" name="valider">

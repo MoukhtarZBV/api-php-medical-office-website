@@ -1,6 +1,6 @@
 <?php
 
-require_once('fonctions.php');
+require_once('../utils/fonctions.php');
 
 function getConsultations(string | null $idMedecin, string | null $idUsager, string | null $date) : array | int {
     $url = $GLOBALS["urlAPIConsultations"];

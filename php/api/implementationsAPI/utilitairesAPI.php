@@ -1,7 +1,7 @@
 <?php
 
 function jetonValide($jwt) {
-    $url = 'http://localhost/api-php-medical-office-website/php/authapi/authapi.php?jwt=' . urlencode($jwt);
+    $url = 'http://localhost/api-php-medical-office-website/php/api/authAPI/authentificationAPI.php?jwt=' . urlencode($jwt);
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);

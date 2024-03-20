@@ -1,6 +1,6 @@
 <?php
 
-require("../functions/fonctions.php");
+require("../../utils/fonctions.php");
 
 /**
  * Renvoie l'usager d'identifiant idUsager dans la bdd liée au PDO pdo
@@ -50,7 +50,7 @@ function getUsagers(PDO $pdo, string | null $civilite, string | null $nom,
 string | null $prenom, string | null $numSS) : array | null {
 
     //déclaration de la requête 
-    $sql = "SELECT * FROM usager";
+    $sql = "SELECT usager.*, medecin.nom as nomMedecin, medecin.prenom as prenomMedecin FROM usager";
 
     // ajout de potentiels filtres de recherche  
     $criteres = ["civilite" => $civilite, "nom" => $nom, "prenom" => $prenom, "numeroSecuriteSociale" => $numSS];
@@ -63,6 +63,7 @@ string | null $prenom, string | null $numSS) : array | null {
             $unCritere = true;
         }
     }
+    $sql .= " LEFT JOIN medecin ON usager.medecinReferent = medecin.idMedecin";
         
     //Exécutuion de la requête 
 

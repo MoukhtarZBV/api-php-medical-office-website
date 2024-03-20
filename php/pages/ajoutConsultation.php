@@ -1,13 +1,14 @@
 <?php session_start();
-    require('fonctions.php');
-    require('fonctionsVerifierInputs.php');
+    require('../functions/fonctionsVerifierInputs.php');
+    require('../db/DAO_consultations.php');
+    require('../connexionDB.php');
     verifierAuthentification();
-    $pdo = creerConnexion();
+    $pdo = createConnection();
 
     $popup = '';
     if (!empty($_POST["Confirmer"])) {
         $today = gmdate('Y-m-d', time());
-        $idMed = $_POST['idMedecin'];
+        $idMedecin = $_POST['idMedecin'];
         $idUsager = $_POST['idUsager'];
         $date = $_POST['date'];
         $heure = $_POST['heureD'];
@@ -25,25 +26,12 @@
             $message = 'La consultation doit durer entre 5 minutes et une heure';
             $classeMessage = 'erreur';
         } else {
-            $stmt = $pdo->prepare("SELECT heureDebut, duree FROM Consultation c, Medecin m WHERE c.idMedecin = m.idMedecin AND m.idMedecin = ? AND dateConsultation = ?");
-            verifierPrepare($stmt);
-            verifierExecute($stmt->execute(["$idMed", "$date"]));
-
-            $consulationsChevauchantes = false;
-            while (!$consulationsChevauchantes && $consultation = $stmt->fetch()){
-                if (consultationsChevauchantes($heure, $duree, substr($consultation['heureDebut'], 0, 5), substr($consultation['duree'], 0, 5))) {
-                    $consulationsChevauchantes = true;
-                }
-            }
+            $consulationsChevauchantes = horaireChevauchantePourMedecin($pdo, $date, $heure, $duree, $idMedecin);
 
             if (!$consulationsChevauchantes) {
-                $stmt = $pdo->prepare("INSERT INTO consultation VALUES (?,?,?,?,?)");
-                verifierPrepare($stmt);
-                verifierExecute($stmt->execute(["$idMed", "$date", "$heure", "$duree", "$idUsager"]));
-                    
+                addConsultation($pdo, $idMedecin, $date, $heure, $duree, $idUsager);
                 $dateFormatee = formaterDate($date);
-                $nomMedecin = $pdo->query("SELECT CONCAT(' ', nom, ' ', prenom) FROM Medecin WHERE idMedecin = " . $idMed)->fetchColumn();
-                $message = 'La consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> pour le médecin <strong>'. $nomMedecin . '</strong> a été ajoutée !';
+                $message = 'La consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> a été ajoutée !';
                 $classeMessage = 'succes';
             } else {
                 $message = 'La consultation chevauche avec un autre créneau pour ce médecin';
@@ -51,10 +39,9 @@
             }
         }
 
-        // Affichage de la popup d'erreur ou de succés
-        if (!empty($message)){
-            $popup = '<div class="popup ' . $classeMessage . '">' . $message .'</div>';
-        }
+        // Création de la popup d'erreur ou de succés
+        $popup = '<div class="popup ' . $classeMessage . '">' . $message .'</div>';
+    
     }
 ?>
 <!DOCTYPE HTML>
@@ -80,9 +67,9 @@
 
         <?php
         echo 'Médecin ';
-        creerComboboxMedecins($pdo, null, null);
+        echo creerComboboxMedecins(null, null);
         echo 'Usager ';
-        creerComboboxUsagers($pdo, null, null); 
+        echo creerComboboxUsagers(null, null); 
         ?>
         <div class="ligne_formulaire temps_consultation">
             <div class="colonne_formulaire moitie">

@@ -1,6 +1,6 @@
 <?php
 
-require("../functions/fonctions.php");
+require("../../utils/fonctions.php");
 
 /**
  * Récupérer une consultation par son identifiant 
@@ -148,4 +148,43 @@ function editConsultation(PDO $pdo, int $idConsultation, int | null $heure, int 
         return false;
     }
     return $stmt->execute($arguments);
+}
+
+/**
+ * 
+ */
+function horaireChevauchantePourMedecin(PDO $pdo, string $date, string $heure, string $duree, int $idMedecin) : bool {
+    $stmt = $pdo->prepare("SELECT heureDebut, duree FROM Consultation c, Medecin m WHERE c.idMedecin = m.idMedecin AND m.idMedecin = ? AND dateConsultation = ?");
+    verifierPrepare($stmt);
+    verifierExecute($stmt->execute([$idMedecin, $date]));
+
+    $consulationsChevauchantes = false;
+    while (!$consulationsChevauchantes && $consultation = $stmt->fetch()){
+        if (consultationsChevauchantes($heure, $duree, substr($consultation['heureDebut'], 0, 5), substr($consultation['duree'], 0, 5))) {
+            $consulationsChevauchantes = true;
+            break;
+        }
+    }
+    return $consulationsChevauchantes;
+}
+
+function consultationsChevauchantes($heureDebutC1, $dureeC1, $heureDebutC2, $dureeC2) {
+    // On crée les dates de début et de fin des deux consultations
+    $debutC1 = DateTime::createFromFormat('H:i', $heureDebutC1);
+    $finC1 = clone $debutC1;
+    list($hours, $minutes) = explode(':', $dureeC1);
+    $finC1->add(new DateInterval("PT{$hours}H{$minutes}M"));
+
+    $debutC2 = DateTime::createFromFormat('H:i', $heureDebutC2);
+    $finC2 = clone $debutC2;
+    list($hours, $minutes) = explode(':', $dureeC2);
+    $finC2->add(new DateInterval("PT{$hours}H{$minutes}M"));
+
+    // On vérifie si les consultations se chevauchent
+    if (($debutC1 >= $debutC2 AND $debutC1 < $finC2) ||
+        ($finC1 > $debutC2 AND $finC1 <= $finC2) || 
+        ($debutC2 >= $debutC1 AND $debutC2 < $finC1)) {
+            return true;
+    }
+    return false;
 }

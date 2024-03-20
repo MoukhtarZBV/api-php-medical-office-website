@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-require("../db/DAOconsultations.php");
+require("../../db/DAO_consultations.php");
 require("utilitairesAPI.php");
 
 $pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
