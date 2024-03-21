@@ -78,7 +78,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
 
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
@@ -106,9 +106,10 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Création d'usager impossible, tous les champs ne sont pas renseignés");
             }
-
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
 
         break;
@@ -117,7 +118,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
 
             //vérification de la présence de l'identifiant dans la requête 
             if (!empty($_GET["id"])) {
@@ -142,8 +143,10 @@ switch ($http_method) {
                 fournirReponse("Erreur", 422, "Identifiant de l'usager non renseigné");
             }
 
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
 
         break;
@@ -152,7 +155,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
 
             $postedData = file_get_contents('php://input');
             $arguments = json_decode($postedData,true); 
@@ -190,8 +193,11 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Au moins un paramètre doit être saisi");
             }
+            
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
 
@@ -199,7 +205,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
 
             $postedData = file_get_contents('php://input');
             $arguments = json_decode($postedData,true); 
@@ -210,37 +216,39 @@ switch ($http_method) {
             empty($arguments["numeroSecuriteSociale"]) || empty($arguments["dateNaissance"]) || 
             empty($arguments["lieuNaissance"])) && !empty($_GET["id"])) {
 
-            $id = $_GET["id"]; $medRef = $arguments["medecinReferent"] ?? null;
+                $id = $_GET["id"]; $medRef = $arguments["medecinReferent"] ?? null;
 
-            $civ = isset($arguments["civilite"]) ? $arguments["civilite"] : null;
-            $nom = isset($arguments["nom"]) ? $arguments["nom"] : null;
-            $prenom = isset($arguments["prenom"]) ? $arguments["prenom"] : null;
-            $adresse = isset($arguments["adresse"]) ? $arguments["adresse"] : null;
-            $ville = isset($arguments["ville"]) ? $arguments["ville"] : null;
-            $codePostal = isset($arguments["codePostal"]) ? $arguments["codePostal"] : null;
-            $numeroSecuriteSociale = isset($arguments["numeroSecuriteSociale"]) ? $arguments["numeroSecuriteSociale"] : null;
-            $dateNaissance = isset($arguments["dateNaissance"]) ? $arguments["dateNaissance"] : null;
-            $lieuNaissance = isset($arguments["lieuNaissance"]) ? $arguments["lieuNaissance"] : null;
-            $medRef = isset($arguments["medecinReferent"]) ? $arguments["medecinReferent"] : null;
+                $civ = isset($arguments["civilite"]) ? $arguments["civilite"] : null;
+                $nom = isset($arguments["nom"]) ? $arguments["nom"] : null;
+                $prenom = isset($arguments["prenom"]) ? $arguments["prenom"] : null;
+                $adresse = isset($arguments["adresse"]) ? $arguments["adresse"] : null;
+                $ville = isset($arguments["ville"]) ? $arguments["ville"] : null;
+                $codePostal = isset($arguments["codePostal"]) ? $arguments["codePostal"] : null;
+                $numeroSecuriteSociale = isset($arguments["numeroSecuriteSociale"]) ? $arguments["numeroSecuriteSociale"] : null;
+                $dateNaissance = isset($arguments["dateNaissance"]) ? $arguments["dateNaissance"] : null;
+                $lieuNaissance = isset($arguments["lieuNaissance"]) ? $arguments["lieuNaissance"] : null;
+                $medRef = isset($arguments["medecinReferent"]) ? $arguments["medecinReferent"] : null;
 
-            if (editUsager($pdo, $id, $civ, $nom, $prenom, $adresse, $ville, $codePostal, $numeroSecuriteSociale,
-            $dateNaissance, $lieuNaissance, $medRef)) {
-                $usager = getUsagerById($pdo, $id);
-                fournirReponse("Succes", 200, "Usager d'ID : ".$id." modifié", $usager);
+                if (editUsager($pdo, $id, $civ, $nom, $prenom, $adresse, $ville, $codePostal, $numeroSecuriteSociale,
+                $dateNaissance, $lieuNaissance, $medRef)) {
+                    $usager = getUsagerById($pdo, $id);
+                    fournirReponse("Succes", 200, "Usager d'ID : ".$id." modifié", $usager);
+                } else {
+                    fournirReponse("Erreur", 400, "Usager d'ID : ".$id." inchangée");
+                }
+
+            } else if (empty($_GET["id"])) {
+                fournirReponse("Erreur", 422, "Paramètre ID non spécifié");
             } else {
-                fournirReponse("Erreur", 400, "Usager d'ID : ".$id." inchangée");
+                fournirReponse("Erreur", 422, "Tous les paramètres doivent être saisis dans un PUT.");
             }
 
-        } else if (empty($_GET["id"])) {
-            fournirReponse("Erreur", 422, "Paramètre ID non spécifié");
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 422, "Tous les paramètres doivent être saisis dans un PUT.");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
-
-    } else {
-        fournirReponse("Erreur", 401, "Jeton invalide");
-    }
-    break;
+        break;
 
 }
 

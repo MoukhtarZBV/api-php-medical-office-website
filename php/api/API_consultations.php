@@ -37,13 +37,14 @@ switch ($http_method) {
             }
         }
         break;
+
     case "POST":
 
-        $jwt = get_bearer_token();
+        $jwt = get_bearer_token(); $arguments = json_decode($contenuFichier, true); 
 
-        //if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && (get_role($jwt) == "admin" || (get_role($jwt) == "medecin" && get_id($jwt) == $arguments["idMedecin"]))) {
             $contenuFichier = file_get_contents('php://input');
-            $arguments = json_decode($contenuFichier, true); 
+
             if (!empty($arguments["idMedecin"]) &&
                 !empty($arguments["idUsager"]) &&
                 !empty($arguments["date"]) &&

@@ -41,7 +41,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
             if (!empty($arguments["civilite"]) &&
@@ -56,13 +56,15 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Création du médecin impossible, tous les champs ne sont pas renseignés");
             }
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
     case "DELETE":
         $jwt = get_bearer_token();
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
             if (!empty($_GET["id"])) {
                 if (deleteMedecin($pdo, $_GET["id"])) {
                     fournirReponse("Succes", 200, "Médecin n°".$_GET["id"]." supprimé");
@@ -72,13 +74,15 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Paramètre ID non spécifié");
             }
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
     case "PATCH":
         $jwt = get_bearer_token();
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
             $postedData = file_get_contents('php://input');
             $data = json_decode($postedData,true); 
             if (!empty($_GET["id"]) && 
@@ -100,13 +104,15 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Au moins un paramètre doit être saisi");
             }
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
     case "PUT":
         $jwt = get_bearer_token();
-        if ($jwt && jetonValide($jwt)) {
+        if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
             $postedData = file_get_contents('php://input');
             $data = json_decode($postedData,true); 
             if (!empty($_GET["id"]) && 
@@ -128,8 +134,10 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Tous les paramètres doivent être saisis");
             }
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
         } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
 }
