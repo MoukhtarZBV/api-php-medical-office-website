@@ -1,6 +1,7 @@
 <?php session_start();
-    require('../api/appelsAPI/appelsAPI_usagers.php');
+    require('../api/appelsAPI_usagers.php');
     require('../utils/balisesDynamiques.php');
+    require('../utils/utilitaires.php');
     verifierAuthentification();
 
     // Récupération des champs qui ont été saisis
@@ -13,7 +14,7 @@
     // Affichage de toutes les usagers récupérés
     if ($usagers) {
         $nombreLignes = '<div class="nombre_lignes"><strong>'. count($usagers) .'</strong> usager(s) trouvé(s)</div>';
-        $table = afficherTableUsager($usagers);
+        $table = construireTableUsager($usagers);
     } else {
         $nombreLignes = '<div class="nombre_lignes" style="color: red;"><strong>Aucun</strong> usager trouvé</div>';
     }

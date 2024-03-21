@@ -1,5 +1,7 @@
 <?php session_start();
-    require('../api/appelsAPI/appelsAPI_medecins.php');
+    require('../api/appelsAPI_medecins.php');
+    require('../utils/balisesDynamiques.php');
+    require('../utils/utilitaires.php');
     verifierAuthentification();
 
     // Récupération des champs qui ont été saisis
@@ -12,23 +14,7 @@
     // Affichage de toutes les médecins récupérés
     if ($medecins) {
         $nombreLignes ='<div class="nombre_lignes"><strong>'. count($medecins) .'</strong> médecin(s) trouvé(s)</div>';
-        $table ='<div class="conteneur_table_affichage">
-                <table id="table_affichage">
-                <thead>
-                    <tr>
-                        <th>Civilite </th>
-                        <th>Nom </th>
-                        <th>Prenom </th>
-                    </tr>
-                </thead><tbody>';
-        foreach ($medecins as $medecin){
-            $table = $table . '<tr><td>'.$medecin['civilite'].'</td>'. 
-                    '<td>'.$medecin['nom'].'</td>'.
-                    '<td>'.$medecin['prenom'].'</td>'.                    
-                    '<td>'.'<a href = \'modificationMedecin.php?idMedecin='.$medecin['idMedecin'].'\'><img src="Images/modifier.png" alt="" width=30px></img></a>'.'</td>'.
-                    '<td>'.'<a href = \'suppression.php?id='.$medecin['idMedecin'].'&type=medecin\'><img src="Images/supprimer.png" alt="" width=30px></img></a>'.'</td>'.'</tr>';
-        }
-        $table =$table . '</tbody></table></div>';
+        $table = construireTableMedecins($medecins);
     } else {
         $nombreLignes = '<div class="nombre_lignes" style="color: red;"><strong>Aucun</strong> médecin trouvé</div>';
     }

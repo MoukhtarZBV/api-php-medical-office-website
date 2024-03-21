@@ -1,6 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *");
-require("../../db/DAO_consultations.php");
+require("../db/DAO_consultations.php");
 require("utilitairesAPI.php");
 
 $pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
@@ -41,7 +41,7 @@ switch ($http_method) {
 
         $jwt = get_bearer_token();
 
-        if ($jwt && jetonValide($jwt)) {
+        //if ($jwt && jetonValide($jwt)) {
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
             if (!empty($arguments["idMedecin"]) &&
@@ -58,9 +58,9 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Création consultation impossible, tous les champs ne sont pas renseignés");
             }
-        } else {
+       /* } else {
             fournirReponse("Erreur", 401, "Jeton invalide");
-        }
+        }*/
         break;
 
     case "DELETE":

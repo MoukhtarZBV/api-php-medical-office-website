@@ -8,7 +8,7 @@
         $motDePasse = $_POST['motDePasse'];
     
         $messageErreur = '';
-        if ($nomUtilisateur == 'CABINET' && $motDePasse == 'CABINET') {
+        if ($nomUtilisateur == 'root' && $motDePasse == '$iutinfo') {
             $_SESSION['utilisateur'] = $nomUtilisateur;
             header('Location: index.php');
             exit();

@@ -1,6 +1,6 @@
 <?php
 
-require("../../utils/fonctions.php");
+require("../utils/utilitaires.php");
 
 /**
  * Renvoie l'usager d'identifiant idUsager dans la bdd liée au PDO pdo

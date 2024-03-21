@@ -1,11 +1,10 @@
 <?php session_start();
-    require('../functions/fonctionsVerifierInputs.php');
-    require('../db/DAO_consultations.php');
-    require('../connexionDB.php');
+    require('../api/appelsAPI_Consultations.php');
+    require('../utils/fonctionsVerifierInputs.php');
+    require('../utils/balisesDynamiques.php');
+    require('../utils/utilitaires.php');
     verifierAuthentification();
-    $pdo = createConnection();
-
-    $popup = '';
+    
     if (!empty($_POST["Confirmer"])) {
         $today = gmdate('Y-m-d', time());
         $idMedecin = $_POST['idMedecin'];
@@ -26,13 +25,17 @@
             $message = 'La consultation doit durer entre 5 minutes et une heure';
             $classeMessage = 'erreur';
         } else {
-            $consulationsChevauchantes = horaireChevauchantePourMedecin($pdo, $date, $heure, $duree, $idMedecin);
+            $consulationsChevauchantes = horaireChevauchantePourMedecin(API_getConsultations(null, null, null), $date, $heure, $duree, $idMedecin);
 
             if (!$consulationsChevauchantes) {
-                addConsultation($pdo, $idMedecin, $date, $heure, $duree, $idUsager);
-                $dateFormatee = formaterDate($date);
-                $message = 'La consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> a été ajoutée !';
-                $classeMessage = 'succes';
+                if ($consultation = API_addConsultation($idMedecin, $idUsager, $date, $heure, $duree)) {       
+                    $dateFormatee = formaterDate($date);
+                    $message = 'La consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong> a été ajoutée !';
+                    $classeMessage = 'succes';
+                } else {
+                    $message = 'Une erreur s\'est produite lors de l\'ajout de la consultation du <strong>' . $dateFormatee . '</strong> à <strong>' . str_replace(':', 'H', $heure) . '</strong>';
+                    $classeMessage = 'erreur';
+                }
             } else {
                 $message = 'La consultation chevauche avec un autre créneau pour ce médecin';
                 $classeMessage = 'erreur';
@@ -49,13 +52,13 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="header.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../../css/header.css">
+    <link rel="stylesheet" href="../../css/style.css">
     <title> Planification d'une consultation </title>
 </head>
 
 <body id="body_fond">
-    <?php include 'header.html' ?>
+    <?php include '../../header.html' ?>
 
     <?php if (!empty($popup)) { echo $popup; } ?>
 

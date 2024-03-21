@@ -1,10 +1,10 @@
 <?php
 
-require_once('../api/appelsAPI/appelsAPI_Medecins.php');
-require_once('../api/appelsAPI/appelsAPI_Usagers.php');
+include_once('../api/appelsAPI_Medecins.php');
+include_once('../api/appelsAPI_Usagers.php');
 
 function creerComboboxUsagers($idUsager = null, $message = null) {
-    $usagers = API_getUsagers(null, null, null);
+    $usagers = API_getUsagers(null, null);
     echo '<select name="idUsager" id="combobox_usagers">';
     if ($message != null){
         echo '<option value="">' . $message . '</option>';
@@ -19,7 +19,7 @@ function creerComboboxUsagers($idUsager = null, $message = null) {
 } 
 
 function creerComboboxMedecins($idMedecin = null, $message = null) {
-    $medecins = API_getMedecins(null, null, null);
+    $medecins = API_getMedecins(null, null);
     echo '<select name="idMedecin" id="combobox_medecins">';
     if ($message != null){
         echo '<option value="">' . $message . '</option>';
@@ -33,7 +33,7 @@ function creerComboboxMedecins($idMedecin = null, $message = null) {
     echo '</select>';
 } 
 
-function afficherTableUsager(array $usagers) : string {
+function construireTableUsager(array $usagers) : string {
     // Créer l'entête de la table 
     $table = '<div class="conteneur_table_affichage">
                 <table id="table_affichage">
@@ -65,8 +65,61 @@ function afficherTableUsager(array $usagers) : string {
                 '<td>'.$dateFormatee.'</td>'.
                 '<td>'.$usager['lieuNaissance'].'</td>'.
                 '<td>'.$usager['nomMedecin'].' '.$usager['prenomMedecin'].'</td>'.
-                '<td>'.'<a href = \'modificationusager.php?idUsager='.$usager['medecinReferent'].'\'><img src="../../images/modifier.png" alt=""width=30px></img></a></td>'.
-                '<td>'.'<a href = \'suppression.php?id='.$usager['medecinReferent'].'&type=usager\'><img src="../../images/supprimer.png" alt=""width=30px></img></a></td></tr>';
+                '<td>'.'<a href = \'modificationusager.php?idUsager='.$usager['medecinReferent'].'\'><img src="../images/modifier.png" alt=""width=30px></img></a></td>'.
+                '<td>'.'<a href = \'suppression.php?id='.$usager['medecinReferent'].'&type=usager\'><img src="../images/supprimer.png" alt=""width=30px></img></a></td></tr>';
+    }
+    $table = $table . '</tbody></table></div>';
+    return $table;
+}
+
+function construireTableMedecins(array $medecins) : string {
+    // Créer l'entête de la table 
+    $table ='<div class="conteneur_table_affichage">
+                <table id="table_affichage">
+                <thead>
+                    <tr>
+                        <th>Civilite </th>
+                        <th>Nom </th>
+                        <th>Prenom </th>
+                    </tr>
+            </thead><tbody>';
+        
+    // Créer le corps de la table 
+    foreach ($medecins as $medecin){
+        $table = $table . '<tr><td>'.$medecin['civilite'].'</td>'. 
+                '<td>'.$medecin['nom'].'</td>'.
+                '<td>'.$medecin['prenom'].'</td>'.                    
+                '<td>'.'<a href = \'modificationMedecin.php?idMedecin='.$medecin['idMedecin'].'\'><img src="../images/modifier.png" alt="" width=30px></img></a>'.'</td>'.
+                '<td>'.'<a href = \'suppression.php?id='.$medecin['idMedecin'].'&type=medecin\'><img src="../images/supprimer.png" alt="" width=30px></img></a>'.'</td>'.'</tr>';
+    }
+    $table = $table . '</tbody></table></div>';
+    return $table;
+}
+
+function construireTableConsultations(array $consultations) : string {
+    // Créer l'entête de la table 
+    $table = '<div class="conteneur_table_affichage">
+                    <table id="table_affichage">
+                                <thead>
+                                    <tr>
+                                        <th>Médecin</th>
+                                        <th>Patient</th>
+                                        <th>Date de consultation</th>
+                                        <th>Heure de consultation</th>
+                                        <th>Durée de consultation</th>
+                                    </tr>
+                            </thead><tbody>';
+                        
+    // Créer le corps de la table 
+    foreach ($consultations as $consultation) {
+        $dateFormatee = formaterDate($consultation['dateConsultation']);
+        $table = $table . '<tr><td>' . $consultation['nomMedecin'] . '</td>' .
+            '<td>' . $consultation['nomUsager'] . '</td>' .
+            '<td>' . $dateFormatee . '</td>' .
+            '<td>' . str_replace(':', 'H', substr($consultation['heureDebut'], 0, 5)) . '</td>' .
+            '<td>' . str_replace(':', 'H', substr($consultation['duree'], 0, 5)) . '</td>' .
+            '<td>' . '<a href = \'modificationConsultation.php?id=' . $consultation['idConsultation'] . '\'><img src="../images/modifier.png" alt=""width=30px></a></td>' .
+            '<td>' . '<a href = \'suppression.php?id=' . $consultation['idConsultation'] . '&type=consultation\'><img src="../images/supprimer.png" alt=""width=30px></a></td></tr>';
     }
     $table = $table . '</tbody></table></div>';
     return $table;

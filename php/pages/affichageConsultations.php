@@ -1,6 +1,7 @@
 <?php session_start();
-    require('../api/appelsAPI/appelsAPI_Consultations.php');
+    require('../api/appelsAPI_Consultations.php');
     require('../utils/balisesDynamiques.php');
+    require('../utils/utilitaires.php');
     verifierAuthentification();
     
     // Récupération des champs qui ont été saisis
@@ -9,33 +10,12 @@
     $date = $_POST["date"] ?? null;
 
     // Appel à l'API pour récupérer les consultations, filtrées ou non
-    $consultations = getConsultations($idMedecin, $idUsager, $date);
+    $consultations = API_getConsultations($idMedecin, $idUsager, $date);
 
     // Affichage de toutes les consultations récupérées
     if ($consultations) {
         $nombreLignes = '<div class="nombre_lignes"><strong>' . count($consultations) . '</strong> consultation(s) trouvée(s)</div>';
-        $table = '<div class="conteneur_table_affichage">
-                    <table id="table_affichage">
-                                <thead>
-                                    <tr>
-                                        <th>Médecin</th>
-                                        <th>Patient</th>
-                                        <th>Date de consultation</th>
-                                        <th>Heure de consultation</th>
-                                        <th>Durée de consultation</th>
-                                    </tr>
-                                </thead><tbody>';
-        foreach ($consultations as $consultation) {
-            $dateFormatee = formaterDate($consultation['dateConsultation']);
-            $table = $table . '<tr><td>' . $consultation['nomMedecin'] . '</td>' .
-                '<td>' . $consultation['nomUsager'] . '</td>' .
-                '<td>' . $dateFormatee . '</td>' .
-                '<td>' . str_replace(':', 'H', substr($consultation['heureDebut'], 0, 5)) . '</td>' .
-                '<td>' . str_replace(':', 'H', substr($consultation['duree'], 0, 5)) . '</td>' .
-                '<td>' . '<a href = \'modificationConsultation.php?id=' . $consultation['idConsultation'] . '\'><img src="Images/modifier.png" alt=""width=30px></a></td>' .
-                '<td>' . '<a href = \'suppression.php?id=' . $consultation['idConsultation'] . '&type=consultation\'><img src="Images/supprimer.png" alt=""width=30px></a></td></tr>';
-        }
-        $table = $table . '</tbody></table></div>';
+        $table = construireTableConsultations($consultations);
     } else {
         $nombreLignes = '<div class="nombre_lignes" style="color: red;"><strong>Aucune</strong> consultation trouvée</div>';
     }

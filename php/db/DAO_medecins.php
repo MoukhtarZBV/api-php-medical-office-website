@@ -1,6 +1,6 @@
 <?php
 
-require("../../utils/fonctions.php");
+require("../utils/utilitaires.php");
 
 /**
  * Renvoie le médecin d'identifiant idMedecin 
