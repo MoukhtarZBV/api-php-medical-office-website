@@ -1,7 +1,7 @@
 <?php
 
     require("utilitairesJWT.php");
-    require("../db/connexionDB.php");
+    require("../../db/connexionDB.php");
 
     $_SECRET_KEY = "SECRET_KEY";
 

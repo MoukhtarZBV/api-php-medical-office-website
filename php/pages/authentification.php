@@ -1,4 +1,6 @@
 <?php session_start();
+    require("../api/appelsAPI_authentification.php");
+
     if (isset($_SESSION['utilisateur']) && !empty($_SESSION['utilisateur'])){
         header('Location: index.php'); 
         exit();
@@ -10,6 +12,7 @@
         $messageErreur = '';
         if ($nomUtilisateur == 'root' && $motDePasse == '$iutinfo') {
             $_SESSION['utilisateur'] = $nomUtilisateur;
+            $_SESSION["jwt"] = API_getToken($nomUtilisateur, $motDePasse);
             header('Location: index.php');
             exit();
         } else {

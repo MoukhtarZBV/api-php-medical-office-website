@@ -59,13 +59,13 @@
         <div class="conteneur_civilite">
             Civilité
             <div class="choix_civilite">
-                <input type="radio" id="civM" name="civ" value="M" checked />
-                <label for="civM">M</label>
+                <input type="radio" id="civM" name="civ" value="M;" checked />
+                <label for="civM">M.</label>
                 <img src="../../images/homme.png" alt="Homme" class="image_civilite">
             </div>
             <div class="choix_civilite">
-                <input type="radio" id="civMme" name="civ" value="Mme" />
-                <label for="civMme">Mme</label>
+                <input type="radio" id="civMme" name="civ" value="Mme." />
+                <label for="civMme">Mme.</label>
                 <img src="../../images/femme.png" alt="Femme" class="image_civilite">
             </div>
         </div>

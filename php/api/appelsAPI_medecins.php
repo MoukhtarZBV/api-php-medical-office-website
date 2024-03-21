@@ -18,8 +18,8 @@ function API_getMedecins(string | null $nom, string | null $prenom) : array | in
     }
 }
 
-function API_addMedecin(string $civilite, string $nom, string $prenom) : bool | array {
-    $url = $GLOBALS["urlAPI_consultations"];
+function API_addMedecin(string $civilite, string $nom, string $prenom) : null | array {
+    $url = $GLOBALS["urlAPI_medecins"];
 
     $infosConsultation = array(
         "civilite" => $civilite, 
@@ -57,3 +57,4 @@ function ajouterParamsURL(string | null $nom, string | null $prenom) : string {
     return $url;
 }
 
+echo API_addMedecin("M.", "Pierre", "Antoine");
