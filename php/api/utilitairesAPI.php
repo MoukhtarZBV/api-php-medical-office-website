@@ -60,3 +60,27 @@ function get_bearer_token() {
     }
     return null;
 }
+
+function get_role($jwt) {
+	// split the jwt
+	$tokenParts = explode('.', $jwt);
+	//print_r($tokenParts);
+	$header = base64_decode($tokenParts[0]);
+	$payload = base64_decode($tokenParts[1]);
+	$signature_provided = $tokenParts[2];
+
+	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
+	return json_decode($payload)->role;
+}
+
+function get_id($jwt) {
+	// split the jwt
+	$tokenParts = explode('.', $jwt);
+	//print_r($tokenParts);
+	$header = base64_decode($tokenParts[0]);
+	$payload = base64_decode($tokenParts[1]);
+	$signature_provided = $tokenParts[2];
+
+	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
+	return json_decode($payload)->idUtilisateur;
+}
