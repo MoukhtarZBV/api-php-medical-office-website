@@ -59,9 +59,11 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Création consultation impossible, tous les champs ne sont pas renseignés");
             }
-       /* } else {
-            fournirReponse("Erreur", 401, "Jeton invalide");
-        }*/
+        } else if (!jetonValide($jwt)) {
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
+        } else {
+            fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
+        }
         break;
 
     case "DELETE":

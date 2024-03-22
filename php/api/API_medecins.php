@@ -80,6 +80,7 @@ switch ($http_method) {
             fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
+
     case "PATCH":
         $jwt = get_bearer_token();
         if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
@@ -110,6 +111,7 @@ switch ($http_method) {
             fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }
         break;
+        
     case "PUT":
         $jwt = get_bearer_token();
         if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
