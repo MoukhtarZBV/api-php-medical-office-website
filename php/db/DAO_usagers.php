@@ -56,14 +56,16 @@ string | null $prenom, string | null $numSS) : array | null {
     $criteres = ["civilite" => $civilite, "nom" => $nom, "prenom" => $prenom, "numeroSecuriteSociale" => $numSS];
     $arguments = array();
     $unCritere = false;
+    
+    $sql .= " LEFT JOIN medecin ON usager.medecinReferent = medecin.idMedecin ";
+
     foreach ($criteres as $cle => $valeur) {
         if (!empty($valeur)) {
-            $sql .= ($unCritere ? " AND " : " WHERE ") . $cle . " = :" . $cle;
+            $sql .= ($unCritere ? " AND " : " WHERE ") . "usager." . $cle . " = :" . $cle;
             $arguments[$cle] = $valeur;
             $unCritere = true;
         }
     }
-    $sql .= " LEFT JOIN medecin ON usager.medecinReferent = medecin.idMedecin";
         
     //Exécutuion de la requête 
 

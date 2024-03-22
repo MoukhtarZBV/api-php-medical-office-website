@@ -84,3 +84,11 @@ function get_id($jwt) {
 	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
 	return json_decode($payload)->idUtilisateur;
 }
+
+function isRightMedecin($idMedecin, $jwt) {
+	return get_role($jwt) == "medecin" && get_id($jwt) == $idMedecin;
+}
+
+function isRightUsager($idUsager, $jwt) {
+	return get_role($jwt) == "usager" && get_id($jwt) == $idUsager;
+}

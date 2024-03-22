@@ -8,6 +8,10 @@ $http_method = $_SERVER['REQUEST_METHOD'];
 
 switch ($http_method) {
 
+    $jwt = get_bearer_token();
+
+    if ($jwt && jetonValide($jwt) && (get_role($jwt) == "admin" || get_role($jwt) == "medecin")) {
+
     case "GET":
 
         //vérification de si l'id de l'usager a été spécifié
@@ -71,6 +75,12 @@ switch ($http_method) {
             }
 
         }
+
+    } else if (!jetonValide($jwt)) {
+        fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
+    } else {
+        fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
+    }
 
         break;
 
