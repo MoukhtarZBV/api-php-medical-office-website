@@ -22,7 +22,7 @@
             $jwt = generate_jwt($headers, $payload, $_SECRET_KEY);
             fournirReponse("Succes", 200, "Login réussi", $jwt);
         } else {
-            fournirReponse("Erreur", 401, "Login et/ou mot de passe incorrect(s)", null);
+            fournirReponse("Erreur", 401, "Login et/ou mot de passe incorrect(s)");
         }
         
     } else if ($_SERVER["REQUEST_METHOD"] == "GET") {

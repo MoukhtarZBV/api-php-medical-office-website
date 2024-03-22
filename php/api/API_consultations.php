@@ -59,9 +59,9 @@ switch ($http_method) {
             } else {
                 fournirReponse("Erreur", 422, "Création consultation impossible, tous les champs ne sont pas renseignés");
             }
-       /* } else {
+        } else {
             fournirReponse("Erreur", 401, "Jeton invalide");
-        }*/
+        }
         break;
 
     case "DELETE":

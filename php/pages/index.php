@@ -1,5 +1,5 @@
 <?php session_start();
-    require('php/functions/fonctions.php');
+    require('../utils/utilitaires.php');
     verifierAuthentification(); 
 ?>
 <!DOCTYPE HTML>
@@ -7,12 +7,12 @@
 
 <head>
     <meta charset="utf-8">
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="header.css">
+    <link rel="stylesheet" href="../../css/style.css">
+    <link rel="stylesheet" href="../../css/header.css">
     <title> Accueil </title>
 </head>
 <body id="body_accueil">
-    <?php include 'header.html' ?>
+    <?php include '../../header.html' ?>
     
     <h1 id="titre_accueil"> Accueil </h1>
      

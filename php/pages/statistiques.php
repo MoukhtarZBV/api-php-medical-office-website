@@ -1,20 +1,6 @@
 <?php session_start();
     require('fonctions.php');
     verifierAuthentification();
-    $pdo = creerConnexion();
-
-    $reqHommes = 'SELECT
-                    SUM(CASE WHEN civilite = \'M\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') < 25 THEN 1 ELSE 0 END) AS hommesMoins25,
-                    SUM(CASE WHEN civilite = \'M\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') BETWEEN 25 AND 50 THEN 1 ELSE 0 END) AS hommesEntre25et50,
-                    SUM(CASE WHEN civilite = \'M\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') > 50 THEN 1 ELSE 0 END) AS hommesPlus50
-                    FROM usager';
-    $reqFemmes = 'SELECT
-                    SUM(CASE WHEN civilite = \'Mme\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') < 25 THEN 1 ELSE 0 END) AS femmesMoins25,
-                    SUM(CASE WHEN civilite = \'Mme\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') BETWEEN 25 AND 50 THEN 1 ELSE 0 END) AS femmesEntre25et50,
-                    SUM(CASE WHEN civilite = \'Mme\' AND DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), dateNaissance)), \'%Y\') > 50 THEN 1 ELSE 0 END) AS femmesPlus50
-                    FROM usager';
-    $statsHommes = $pdo->query($reqHommes)->fetch();
-    $statsFemmes = $pdo->query($reqFemmes)->fetch();
 
 ?>
 <!DOCTYPE HTML>
@@ -66,7 +52,7 @@
             </tr>
         </thead><tbody>
     <?php
-        $reqDureeTotale = $pdo->query('SELECT civilite, nom, prenom, TIME_FORMAT(SEC_TO_TIME(SUM(TIME_TO_SEC(duree))), \'%kh%i\') as duree FROM medecin m, consultation c WHERE m.idMedecin = c.idMedecin GROUP BY nom, prenom, civilite');
+        
         while ($donnees = $reqDureeTotale->fetch()){
             echo '<tr>
                     <td>'.$donnees['civilite'].'</td>

@@ -19,6 +19,34 @@ function API_getUsagers(string | null $nom, string | null $prenom) : array | int
     }
 }
 
+function API_addMedecin(string $civilite, string $nom, string $prenom) : null | array {
+    $url = $GLOBALS["urlAPI_medecins"];
+
+    $infosConsultation = array(
+        "civilite" => $civilite, 
+        "nom" => $nom, 
+        "prenom" => $prenom
+    );
+    $authorization = "Authorization: Bearer ".$_SESSION["jwt"];
+
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($infosConsultation));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
+    $resultat = curl_exec($ch);
+    curl_close($ch);
+    
+    if ($resultat) {
+        $resultat = json_decode($resultat, true);
+        return $resultat["donnees"];
+    } else {
+        return null;
+    }
+}
+
+
 function ajouterParamsURL1(string | null $nom, string | null $prenom) : string {
     $url = "";
     $premierFiltre = true;

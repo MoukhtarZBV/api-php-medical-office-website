@@ -4,7 +4,7 @@
     require('../utils/balisesDynamiques.php');
     require('../utils/utilitaires.php');
     verifierAuthentification();
-
+    
     $popup = '';
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["Confirmer"])) {
         $civilite = $_POST['civ'];

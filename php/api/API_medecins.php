@@ -40,7 +40,7 @@ switch ($http_method) {
     case "POST":
 
         $jwt = get_bearer_token();
-
+        
         if ($jwt && jetonValide($jwt) && get_role($jwt) == "admin") {
             $contenuFichier = file_get_contents('php://input');
             $arguments = json_decode($contenuFichier, true); 
@@ -57,7 +57,7 @@ switch ($http_method) {
                 fournirReponse("Erreur", 422, "Création du médecin impossible, tous les champs ne sont pas renseignés");
             }
         } else if (!jetonValide($jwt)) {
-            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré");
+            fournirReponse("Erreur", 401, "Jeton invalide, votre session a peut être expiré", jetonValide($jwt));
         } else {
             fournirReponse("Erreur", 401, "Jeton invalide, vous n'avez pas l'autorisation pour cette action");
         }

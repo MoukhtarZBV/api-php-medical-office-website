@@ -4,13 +4,13 @@ body {
 }
 
 #body_fond {
-    background: url(Images/fond.png);
+    background: url(../images/fond.png);
     background-size: 400px;
     background-color: #ebebeb;
 }
 
 #body_accueil {
-    background: url(Images/fondAccueil.png);
+    background: url(../images/fondAccueil.png);
     background-size: 400px;
 }
 
@@ -232,7 +232,7 @@ input[type="radio"] {
 #corps_connexion input[type=text],
 #corps_connexion input[type=password] {
     padding: 10px;
-    background: url(Images/utilisateur.png) no-repeat scroll 8px 50%;
+    background: url(../images/utilisateur.png) no-repeat scroll 8px 50%;
     padding-left: 40px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
@@ -241,7 +241,7 @@ input[type="radio"] {
 }
 
 #corps_connexion input[type=password] {
-    background: url(Images/motDePasse.png) no-repeat scroll 8px 50%;
+    background: url(../images/motDePasse.png) no-repeat scroll 8px 50%;
     background-size: 16px;
 }
 
@@ -344,7 +344,7 @@ input[type="radio"] {
 /* ======================================= */
 
 #body_accueil {
-    background: rgba(0, 0, 0, .4) url(Images/fondAccueil.png);
+    background: rgba(0, 0, 0, .4) url(../images/fondAccueil.png);
     background-size: cover;
     margin: 0px;
     background-blend-mode: darken;

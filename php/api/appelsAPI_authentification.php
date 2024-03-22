@@ -18,7 +18,7 @@ function API_getToken(string $login, string $password) : string {
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
     $resultat = curl_exec($ch);
     curl_close($ch);
-
+    echo $resultat;
     $resultat = json_decode($resultat, true);
     if (200 <= $resultat["statutCode"] && $resultat["statutCode"] < 300) {
         return $resultat["donnees"];

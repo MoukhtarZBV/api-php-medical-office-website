@@ -10,7 +10,7 @@
         $motDePasse = $_POST['motDePasse'];
     
         $messageErreur = '';
-        if ($nomUtilisateur == 'root' && $motDePasse == '$iutinfo') {
+        if ($nomUtilisateur == 'root' && $motDePasse == 'admin') {
             $_SESSION['utilisateur'] = $nomUtilisateur;
             $_SESSION["jwt"] = API_getToken($nomUtilisateur, $motDePasse);
             header('Location: index.php');
@@ -29,7 +29,7 @@
 <head>
     <meta charset="utf-8" />
     <title> Connexion </title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body id='body_fond'>
     <div id='conteneur_connexion'>

@@ -1,8 +1,9 @@
 <?php session_start();
-    require('fonctions.php');
-    require('fonctionsVerifierInputs.php');
+    require('../api/appelsAPI_usagers.php');
+    require('../utils/fonctionsVerifierInputs.php');
+    require('../utils/balisesDynamiques.php');
+    require('../utils/utilitaires.php');
     verifierAuthentification();
-    $pdo = creerConnexion();
 
     $today = gmdate('Y-m-d', time());
     if (isset($_POST["Confirmer"]) && !empty($_POST["Confirmer"])) {
@@ -17,8 +18,6 @@
         $lieu = $_POST['lieu'];
         $idMed = !empty($_POST['idMedecin']) ? $_POST['idMedecin'] : null;
 
-        $message = '';
-        $classeMessage = '';
         if (!inputSansEspacesCorrect($nom, TAILLE_NOM)){
             $message = 'Le nom n\'est pas correctement saisi';
             $classeMessage = 'erreur';
@@ -41,21 +40,11 @@
             $message = 'La ville de naissance n\'est pas correctement saisie';
             $classeMessage = 'erreur';
         } else {
-            $stmt = $pdo->prepare("INSERT INTO usager (civilite, nom, prenom, adresse, ville, codePostal, numeroSecuriteSociale, dateNaissance, lieuNaissance, medecinReferent)
-                                    VALUES (?,?,?,?,?,?,?,?,?,?)");
-            verifierPrepare($stmt);
-            try {
-                verifierExecute($stmt->execute([$civ, $nom, $prenom, $adr, $ville, $cp, $nss, $date, $lieu, $idMed]));
-                $message = 'L\'usager <strong>' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
+            if ($medecin = API_addUsager($civilite, $nom, $prenom)) {
+                $message = 'Le médecin <strong>' . $civilite . ' ' . $nom . ' ' . $prenom . '</strong> a été ajouté !';
                 $classeMessage = 'succes';
-            } catch (PDOException $e) {
-                $codeErreur = $e->getCode();
-                // Si le code vaut 23000, alors la contrainte d'unicité du numéro de sécurité sociale a été violée
-                if ($codeErreur == '23000') {
-                    $message = 'Un usager avec le numéro de sécurité sociale <strong>' . $nss . '</strong> existe déjà.';
-                } else {
-                    $message = 'Une erreur s\'est produite : ' . $e->getMessage();
-                }
+            } else {
+                $message = 'Une erreur s\'est produite lors de l\'ajout du médecin <strong>' . $civilite . ' ' . $nom . ' ' . $prenom . '</strong>';
                 $classeMessage = 'erreur';
             }
         }
