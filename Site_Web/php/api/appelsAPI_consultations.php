@@ -1,6 +1,6 @@
 <?php
 
-$urlAPI_consultations = "http://localhost/api-php-medical-office-website/php/api/API_consultations.php";
+$urlAPI_consultations = "https://medical-office-ressources.alwaysdata.net/consultations";
 
 function API_getConsultations(string | null $idMedecin, string | null $idUsager, string | null $date) : array | int {
     $url = $GLOBALS["urlAPI_consultations"];
@@ -20,9 +20,12 @@ function API_getConsultations(string | null $idMedecin, string | null $idUsager,
     } 
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $authorization = "Authorization: Bearer ".$_SESSION["jwt"];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
    
     $resultat = curl_exec($ch);
     curl_close($ch);
+
     $resultat = json_decode($resultat, true);
     if (200 <= $resultat["statutCode"] && $resultat["statutCode"] < 300) {
         return $resultat["donnees"];
@@ -47,7 +50,9 @@ function API_addConsultation(int $idMedecin, int $idUsager, string $date, string
     curl_setopt($ch, CURLOPT_POST, 1);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($infosConsultation));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1); 
-    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+    
+    $authorization = "Authorization: Bearer ".$_SESSION["jwt"];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
     $resultat = curl_exec($ch);
     curl_close($ch);
 

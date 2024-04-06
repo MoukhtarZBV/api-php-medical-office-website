@@ -3,7 +3,7 @@
     require('../utils/balisesDynamiques.php');
     require('../utils/utilitaires.php');
     verifierAuthentification();
-    
+    echo password_hash("password1234!", PASSWORD_DEFAULT);
     // Récupération des champs qui ont été saisis
     $idMedecin = $_POST["idMedecin"] ?? null;
     $idUsager = $_POST["idUsager"] ?? null;

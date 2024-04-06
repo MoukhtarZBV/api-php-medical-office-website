@@ -1,0 +1,16 @@
+Options +FollowSymlinks
+RewriteEngine on
+
+RewriteRule ^medecins$ /api/API_medecins.php [L]
+RewriteRule ^usagers$ /api/API_usagers.php [L]
+RewriteRule ^consultations$ /api/API_consultations.php [L]
+RewriteRule ^stats$ /api/API_statistiques.php [L]
+
+# Redirection des parametres
+RewriteRule ^medecins/([^/]+)/?$ /api/API_medecins.php?id=$1 [QSA,L]
+RewriteRule ^usagers/([^/]+)/?$ /api/API_usagers.php?id=$1 [QSA,L]
+RewriteRule ^consultations/([^/]+)/?$ /api/API_consultations.php?id=$1 [QSA,L]
+
+# Statistiques
+RewriteRule ^stats/medecins$ /api/API_statistiques.php?stat=medecins
+RewriteRule ^stats/usagers$ /api/API_statistiques.php?stat=usagers

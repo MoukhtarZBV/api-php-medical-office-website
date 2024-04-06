@@ -8,21 +8,17 @@ require("../utils/utilitaires.php");
  * @param PDO $pdo          PDO permettant la connexion à la BDD
  * @param int $idMedecin    identifiant du médecin recherché 
  * 
- * @return array l'array décrivant le médecin, possiblement vide si aucun n'est trouvé 
+ * @return array | bool     l'array décrivant le médecin OU false si aucun médecin n'a été trouvé
  */
-function getMedecinById(PDO $pdo, int $idMedecin) : array {
+function getMedecinById(PDO $pdo, int $idMedecin) : array | bool {
 
     //Préparation de la requête 
     $stmt = $pdo->prepare("SELECT * FROM medecin WHERE idMedecin = ?");
 
-    //Exécution de la requête 
-    if (!$stmt) {
-        return array();
-    }
-    if ($stmt->execute([$idMedecin])) {
+    if ($stmt && $stmt->execute([$idMedecin])) {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
-    return array();
+    return false;
 
 }
 
@@ -99,15 +95,11 @@ function addMedecin(PDO $pdo, string $civilite, string $nom, string $prenom) : i
  * @return bool renvoie un booléen indiquant si la suppression a été effectuée ou non
  */
 function deleteMedecin(PDO $pdo, int $idMedecin) : bool {
-
     //préparation de la requête
     $stmt = $pdo->prepare("DELETE FROM medecin WHERE idMedecin = ?");
-    if (!$stmt) {
-        return false;
-    }
 
     //exécution de la requête
-    if ($stmt->execute([$idMedecin])) {
+    if ($stmt && $stmt->execute([$idMedecin])) {
         return $stmt->rowCount() > 0;
     }
     return false;
@@ -126,7 +118,7 @@ function deleteMedecin(PDO $pdo, int $idMedecin) : bool {
  * @return bool renvoie un booléen indiquant si la modification a été effectuée ou non
  */
 
-function editMedecin(PDO $pdo, int $idMedecin, string | null $civilite, string | null $nom, string | null $prenom) : bool {
+ function editMedecin(PDO $pdo, int $idMedecin, string | null $civilite, string | null $nom, string | null $prenom) : int {
 
     //déclaration de la requête 
     $sql = "UPDATE medecin SET";
@@ -144,15 +136,17 @@ function editMedecin(PDO $pdo, int $idMedecin, string | null $civilite, string |
     }
 
     //ajout de la clause de recherche du médecin à modifier 
-    if (!$unCritere) { return false; }
+    if (!$unCritere) { return 0; }
     $arguments["idMedecin"] = $idMedecin;
     $sql .= " WHERE idMedecin = :idMedecin";
 
-    //préparation et exécution de la requête 
-    $stmt = $pdo->prepare($sql);
-    if (!$stmt) {
-        return false;
+    try {
+        // Préparation & exécution de la requête
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($arguments);
+        return $stmt->rowCount();
+    } catch (PDOException $exception ) {
+        return 0;
     }
-    return $stmt->execute($arguments);
 
 }

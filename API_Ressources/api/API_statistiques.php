@@ -1,16 +1,21 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 require("../db/DAO_statistiques.php");
+require("../db/connexionDB.php");
 require("utilitairesAPI.php");
 
-$pdo = new PDO("mysql:host=mysql-medical-office.alwaysdata.net;dbname=medical-office_ressources", '350740', '$iutinfo');
+$pdo = createConnection();
 $http_method = $_SERVER['REQUEST_METHOD'];
+
 if ($http_method == "GET") {
-    if (!empty($_GET["type"])) {
-        $type = $_GET["type"];
+    if (!empty($_GET["stat"])) {
+        $type = $_GET["stat"];
         if ($type == "medecins") {
-            if ($statsMedecins = getStatistiquesMedecins($pdo)) {
+            $statsMedecins = getStatistiquesMedecins($pdo);
+            if (!empty($statsMedecins)) {
                 fournirReponse("Succes", 200, "Statistiques sur la durée totale des consultations des médecins récupérées", $statsMedecins);
+            } else if (is_array($statsMedecins)) {
+                fournirReponse("Erreur", 404, "Il n'existe pas de consultations pour établir des statistiques");
             } else {
                 fournirReponse("Erreur", 400, "Erreur lors de la récupération des statistiques des médecins");
             }

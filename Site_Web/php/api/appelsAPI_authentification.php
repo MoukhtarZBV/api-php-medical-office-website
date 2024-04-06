@@ -1,13 +1,13 @@
 <?php
 
-$urlAPI_authentification = "http://localhost/api-php-medical-office-website/php/api/authentificationAPI/authAPI.php";
+$urlAPI_authentification = "https://medical-office.alwaysdata.net/api/API_auth.php";
 
 function API_getToken(string $login, string $password) : string {
     $url = $GLOBALS["urlAPI_authentification"];
 
     $infosUtilisateur = array(
         "login" => $login, 
-        "password" => $password
+        "mdp" => $password
     );
 
     $ch = curl_init();

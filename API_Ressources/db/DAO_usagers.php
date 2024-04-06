@@ -9,27 +9,20 @@ require("../utils/utilitaires.php");
  * @param PDO $pdo      le pdo de la connexion à la bdd
  * @param int $idUsager l'identifiant de l'usager à trouver
  * 
- * @return array|null        un array décrivant l'usager trouvé OU null s'il y a eu une erreur 
+ * @return array|bool        un array décrivant l'usager trouvé OU false si aucun usager n'a été récupéré 
  */
-function getUsagerById(PDO $pdo, int $idUsager) : array|null {
+function getUsagerById(PDO $pdo, int $idUsager) : array|bool {
 
     //préparation de la requête 
-    $stmt = $pdo->prepare("SELECT * FROM usager WHERE idUsager = ?");
-    if (!$stmt) {
-        return array();
-    }
+    $stmt = $pdo->prepare("SELECT usager.*, DATE_FORMAT(usager.dateNaissance, '%d/%m/%Y') as dateNaissance, medecin.nom as nomMedecin, medecin.prenom as prenomMedecin 
+                            FROM usager 
+                            LEFT JOIN medecin ON usager.medecinReferent = medecin.idMedecin
+                            WHERE idUsager = ?");
 
-    //exécution de la requête
-    try {
-        $stmt->execute([$idUsager]);
-        if ($res = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            return $res;
-        } else {
-            return array();
-        }
-    } catch(PDOException $Exception) {
-        return null;
+    if ($stmt && $stmt->execute([$idUsager])) {
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
+    return false;
     
 }
 
@@ -50,7 +43,7 @@ function getUsagers(PDO $pdo, string | null $civilite, string | null $nom,
 string | null $prenom, string | null $numSS) : array | null {
 
     //déclaration de la requête 
-    $sql = "SELECT usager.*, medecin.nom as nomMedecin, medecin.prenom as prenomMedecin FROM usager";
+    $sql = "SELECT usager.*, DATE_FORMAT(usager.dateNaissance, '%d/%m/%Y') as dateNaissance, medecin.nom as nomMedecin, medecin.prenom as prenomMedecin FROM usager";
 
     // ajout de potentiels filtres de recherche  
     $criteres = ["civilite" => $civilite, "nom" => $nom, "prenom" => $prenom, "numeroSecuriteSociale" => $numSS];
@@ -66,9 +59,8 @@ string | null $prenom, string | null $numSS) : array | null {
             $unCritere = true;
         }
     }
-        
-    //Exécutuion de la requête 
-
+  
+    //Execution de la requête 
     try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute($arguments);
@@ -96,26 +88,29 @@ string | null $prenom, string | null $numSS) : array | null {
  * 
  * @return int|null l'identifiant de l'usager inséré OU null s'il y a eu une erreur
  */
-function addUsager(PDO $pdo, string $civilite, string $nom, string $prenom, string $adresse, string $ville,
-    string $codePostal, string $numeroSecuriteSociale, string $dateNaissance, string $lieuNaissance, int | null $medecinReferent) : int | null {
-
-    //préparation de la requête
-    $stmt = $pdo->prepare("INSERT INTO usager(civilite, nom, prenom, adresse, ville, codePostal, numeroSecuriteSociale, dateNaissance, lieuNaissance, medecinReferent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-    if (!$stmt) {
-        return null;
-    }
+function addUsager(PDO $pdo, string $civilite, string $sexe, string $nom, string $prenom, string $adresse, string $ville,
+    string $codePostal, string $numeroSecuriteSociale, string $dateNaissance, string $lieuNaissance, int | null $medecinReferent) : int {
 
      //Exécution de la requête et récupération de l'identifiant de l'usager ajouté 
     $pdo->beginTransaction(); 
     try {
-        $idUsager = $stmt->execute([$civilite, $nom, $prenom, $adresse, $ville, $codePostal, $numeroSecuriteSociale, $dateNaissance, $lieuNaissance, $medecinReferent]) ? $pdo->lastInsertId() : null;
-        $pdo->commit();
+        $stmt = $pdo->prepare("INSERT INTO usager(civilite, sexe, nom, prenom, adresse, ville, codePostal, numeroSecuriteSociale, dateNaissance, lieuNaissance, medecinReferent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        $dateFormatee = date('Y-m-d', strtotime(str_replace('/', '-', $dateNaissance)));
+        $idUsager = $stmt->execute([$civilite, $sexe, $nom, $prenom, $adresse, $ville, $codePostal, $numeroSecuriteSociale, $dateFormatee, $lieuNaissance, $medecinReferent]) ? $pdo->lastInsertId() : null;
+        $pdo->commit(); 
+        return $idUsager;
+    } catch (PDOException $exception) {
+        // Violation de la contrainte d'unicité du numéro de sécurité sociale
+        if ($exception->getCode() == '23000' && strpos($exception->getMessage(), '1062') !== false) {
+            return -1;
+        // Violation de la contrainte de clé étrangère pour le médecin référent
+        } else if ($exception->getCode() == '23000' && strpos($exception->getMessage(), '1452') !== false) {
+            return -2;
+        } else {
+            return 0;
+        }
     }
-    catch(PDOException $Exception ) {
-        return null;
-    }
-
-    return $idUsager;
 
 }
 
@@ -125,61 +120,46 @@ function addUsager(PDO $pdo, string $civilite, string $nom, string $prenom, stri
  * @param PDO $pdo      La connexion à la bdd 
  * @param int $idUsager L'identifiant de l'usager à supprimer 
  * 
- * @return bool renvoie un booléen indiquant si la suppression s'est faite 
+ * @return bool         renvoie un booléen indiquant si la suppression s'est faite 
  */
 
-function deleteUsager(PDO $pdo, int $idUsager) : bool|null {
-
+function deleteUsager(PDO $pdo, int $idUsager) : bool {
     try {
         //Préparation & exécution de la requête
         $stmt = $pdo->prepare("DELETE FROM usager WHERE idUsager = ?");
         $stmt->execute([$idUsager]);
         return $stmt->rowCount() > 0;
-    }
-    catch(PDOException $Exception ) {
-        return null;
-    }
-
-    //Préparation de la requête
-    $stmt = $pdo->prepare("DELETE FROM usager WHERE idUsager = ?");
-    if (!$stmt) {
+    } catch(PDOException $Exception ) {
         return false;
     }
-
-    //Exécution de la requête 
-    if ($stmt->execute([$idUsager])) {
-        //renvoie si le nombre de suppressions faites est > à 0 
-        return $stmt->rowCount() > 0;
-    }
-    return false;
-    
 }
 
 /**
  * Modifier l'usager de l'identifiant donné avec les possibles différents champs
  * 
- * @param PDO $pdo                             Le pdo de connexion à la bdd
- * @param int $idUsager                      L'identifiant de l'usager à modifier
+ * @param PDO $pdo                           Le pdo de connexion à la bdd
+ * @param int $idUsager                      l'identifiant de l'usager à modifier
  * @param string|null $civilite              la civilité de l'usager si on veut la modifier
+ * @param string|null $civilite              le sexe de l'usager si on veut le modifier
  * @param string|null $nom                   le nom de l'usager si on veut le modifier
  * @param string|null $prenom                le prénom de l'usager si on veut le modifier
  * @param string|null $adresse               l'adresse de l'usager si on veut la modifier 
  * @param string|null $ville                 la ville d'habitation de l'usager si on veut la modifier 
  * @param string|null $codePostal            le code postal de l'usager si on veut le modifier
- * @param string-null $numeroSecuriteSociale Le numéro de sécurité sociale de l'usager si on veut le modifer
- * @param string|null $dateNaissance         La date de naissance de l'usager si on veut la modifier 
- * @param string-null $lieuNaissance         Le lieu de naissance de l'usager si on veut le modifier
- * @param int|null $medecinReferent          L'identifiant du médecin référent de l'usager si on veut le modifer
+ * @param string|null $numeroSecuriteSociale le numéro de sécurité sociale de l'usager si on veut le modifer
+ * @param string|null $dateNaissance         la date de naissance de l'usager si on veut la modifier 
+ * @param string|null $lieuNaissance         le lieu de naissance de l'usager si on veut le modifier
+ * @param int|null $medecinReferent          l'identifiant du médecin référent de l'usager si on veut le modifer
  * 
  * @return bool renvoie un booléen indiquant si la modification a été faite ou non
  */
-function editUsager(PDO $pdo, int $idUsager, string | null $civilite, string | null $nom, string | null $prenom, 
+function editUsager(PDO $pdo, int $idUsager, string | null $civilite, string | null $sexe, string | null $nom, string | null $prenom, 
     string | null $adresse, string | null $ville, string | null $codePostal, string | null $numeroSecuriteSociale, 
-    string | null $dateNaissance, string | null $lieuNaissance, int | null $medecinReferent)  : bool {
+    string | null $dateNaissance, string | null $lieuNaissance, int | null $medecinReferent) : int {
     
     //récupération de tous les arguments que l'on veut modifier et préparation de la requête en conséquence
     $sql = "UPDATE usager SET";
-    $criteres = ["idUsager" => $idUsager, "civilite" => $civilite, "nom" => $nom, "prenom" => $prenom, "adresse" => $adresse, "ville" => $ville,
+    $criteres = ["idUsager" => $idUsager, "civilite" => $civilite, "sexe" => $sexe, "nom" => $nom, "prenom" => $prenom, "adresse" => $adresse, "ville" => $ville,
     "codePostal" => $codePostal, "numeroSecuriteSociale" => $numeroSecuriteSociale, "dateNaissance" => $dateNaissance,
     "lieuNaissance" => $dateNaissance, "medecinReferent" => $medecinReferent];
     $arguments = array();
@@ -193,16 +173,26 @@ function editUsager(PDO $pdo, int $idUsager, string | null $civilite, string | n
     }
 
     //ajout de la clause de recherche de l'usager
-    if (!$unCritere) { return false; }
+    if (!$unCritere) { return 0; }
+
     $arguments["idUsager"] = $idUsager;
     $sql .= " WHERE idUsager = :idUsager";
-
-    $stmt = $pdo->prepare($sql);
-    if (!$stmt) {
-        return false;
+ 
+    try {
+        //Préparation & exécution de la requête
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($arguments);
+        return $stmt->rowCount();
+    } catch (PDOException $exception ) {
+        // Violation de la contrainte d'unicité du numéro de sécurité sociale
+        if ($exception->getCode() == '23000' && strpos($exception->getMessage(), '1062') !== false) {
+            return -1;
+        // Violation de la contrainte de clé étrangère pour le médecin référent
+        } else if ($exception->getCode() == '23000' && strpos($exception->getMessage(), '1452') !== false) {
+            return -2;
+        } else {
+            return 0;
+        }
     }
-
-    //exécution de la requête 
-    return $stmt->execute($arguments);
   
 }

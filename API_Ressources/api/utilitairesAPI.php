@@ -1,15 +1,21 @@
 <?php
 
-function jetonValide($jwt) : bool {
-    $url = 'http://localhost/api-php-medical-office-website/php/api/authentificationAPI/authAPI.php?jwt=' . urlencode($jwt);
+function verificationJeton($jwt) : mixed {
+	if (empty($jwt)) {
+		return false;
+	}
+    $url = 'https://medical-office.alwaysdata.net/api/API_auth.php';
+
+	
+    $authorization = "Authorization: Bearer ".$jwt;
 
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
     $result = curl_exec($ch);
     curl_close($ch);
-    
-    return json_decode($result)->donnees;
+    return json_decode($result, true)["donnees"];
 }
 
 function fournirReponse(string $statut, string $statutCode, string $statutMessage, mixed $donnees = null) : void {
@@ -61,34 +67,54 @@ function get_bearer_token() {
     return null;
 }
 
-function get_role($jwt) {
-	// split the jwt
-	$tokenParts = explode('.', $jwt);
-	//print_r($tokenParts);
-	$header = base64_decode($tokenParts[0]);
-	$payload = base64_decode($tokenParts[1]);
-	$signature_provided = $tokenParts[2];
-
-	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
-	return json_decode($payload)->role;
+function isAdmin($jwt) {
+	return $jwt["role"] == "admin";
 }
 
-function get_id($jwt) {
-	// split the jwt
-	$tokenParts = explode('.', $jwt);
-	//print_r($tokenParts);
-	$header = base64_decode($tokenParts[0]);
-	$payload = base64_decode($tokenParts[1]);
-	$signature_provided = $tokenParts[2];
+function isMedecin($jwt) {
+	return $jwt["role"] == "medecin";
+}
 
-	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
-	return json_decode($payload)->idUtilisateur;
+function isUsager($jwt) {
+	return $jwt["role"] == "usager";
 }
 
 function isRightMedecin($idMedecin, $jwt) {
-	return get_role($jwt) == "medecin" && get_id($jwt) == $idMedecin;
+	return $jwt["role"] == "medecin" && $jwt["id"] == $idMedecin;
 }
 
 function isRightUsager($idUsager, $jwt) {
-	return get_role($jwt) == "usager" && get_id($jwt) == $idUsager;
+	return $jwt["role"] == "usager" && $jwt["id"] == $idUsager;
+}
+
+function contientEspace(string $champ) {
+	return !empty($champ) && str_contains($champ, ' ');
+}
+
+function contientLettresUniquement(string $champ) {
+	// Le regex ci-dessous vérifie que le champ est constitué 
+	// uniquement de lettres, accents inclus, et d'un point ou d'un tiret
+	return !empty($champ) && preg_match('/^[\p{L}\p{M}.-]+$/u', $champ);
+}
+
+function tailleChampRespectee(string $champ, int $taille){
+	return !empty($champ) && strlen($champ) == $taille;
+}
+
+function tailleChampPlusGrandeQue(string $champ, int $taille){
+	return !empty($champ) && strlen($champ) > $taille;
+}
+
+function nombrePositif(mixed $champ) {
+	return !empty($champ) && ((is_string($champ) && ctype_digit($champ) && $champ > 0) || is_int($champ) && $champ > 0);
+}
+
+function formatDateCorrect(mixed $date, string $format = 'Y-m-d') {
+	$dateTemp = DateTime::createFromFormat($format, $date);
+	return $dateTemp && $dateTemp->format($format) == $date;
+}
+
+function formatHeureCorrect(mixed $heure, string $format = 'H:i') {
+	$heureTemp = DateTime::createFromFormat($format, $heure);
+	return $heureTemp && $heureTemp->format($format) == $heure;
 }

@@ -1,6 +1,6 @@
 <?php
 
-function generate_jwt($headers, $payload, $secret) {
+function genererJeton($headers, $payload, $secret) {
 	$headers_encoded = base64url_encode(json_encode($headers));
 
 	$payload_encoded = base64url_encode(json_encode($payload));
@@ -13,7 +13,7 @@ function generate_jwt($headers, $payload, $secret) {
 	return $jwt;
 }
 
-function is_jwt_valid($jwt, $secret) {
+function jetonValide($jwt, $secret) {
 	// split the jwt
 	$tokenParts = explode('.', $jwt);
 	//print_r($tokenParts);
@@ -22,7 +22,10 @@ function is_jwt_valid($jwt, $secret) {
 	$signature_provided = $tokenParts[2];
 
 	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
-	$expiration = json_decode($payload)->exp;
+	$expiration = json_decode($payload)->exp ?? null;
+	if (empty($expiration)) {
+		return FALSE;
+	}
 	$is_token_expired = ($expiration - time()) < 0;
 
 	// build a signature based on the header and payload using the secret
@@ -45,16 +48,16 @@ function base64url_encode($data) {
     return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
 }
 
-function get_role($jwt) {
-	// split the jwt
+function recupererRole($jwt) {
 	$tokenParts = explode('.', $jwt);
-	//print_r($tokenParts);
-	$header = base64_decode($tokenParts[0]);
 	$payload = base64_decode($tokenParts[1]);
-	$signature_provided = $tokenParts[2];
+	return json_decode($payload)->role ?? null;
+}
 
-	// check the expiration time - note this will cause an error if there is no 'exp' claim in the jwt
-	return json_decode($payload)->role;
+function recupererID($jwt) {
+	$tokenParts = explode('.', $jwt);
+	$payload = base64_decode($tokenParts[1]);
+	return json_decode($payload)->id ?? null;
 }
 
 function fournirReponse(string $statut, string $statutCode, string $statutMessage, mixed $donnees = null) : void {
@@ -71,4 +74,38 @@ function fournirReponse(string $statut, string $statutCode, string $statutMessag
 	echo $reponseJson;
 }
 
+function recupererHeader(){
+	$headers = null;
+
+	if (isset($_SERVER['Authorization'])) {
+		$headers = trim($_SERVER["Authorization"]);
+	} else if (isset($_SERVER['HTTP_AUTHORIZATION'])) { //Nginx or fast CGI
+		$headers = trim($_SERVER["HTTP_AUTHORIZATION"]);
+	} else if (function_exists('apache_request_headers')) {
+		$requestHeaders = apache_request_headers();
+		// Server-side fix for bug in old Android versions (a nice side-effect of this fix means we don't care about capitalization for Authorization)
+		$requestHeaders = array_combine(array_map('ucwords', array_keys($requestHeaders)), array_values($requestHeaders));
+		//print_r($requestHeaders);
+		if (isset($requestHeaders['Authorization'])) {
+			$headers = trim($requestHeaders['Authorization']);
+		}
+	}
+
+	return $headers;
+}
+
+function recupererToken() {
+    $headers = recupererHeader();
+    
+    // HEADER: Get the access token from the header
+    if (!empty($headers)) {
+        if (preg_match('/Bearer\s(\S+)/', $headers, $matches)) {
+            if($matches[1]=='null') //$matches[1] est de type string et peut contenir 'null'
+                return null;
+            else
+                return $matches[1];
+        }
+    }
+    return null;
+}
 ?>

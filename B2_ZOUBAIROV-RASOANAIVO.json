@@ -1,0 +1,1022 @@
+{
+	"info": {
+		"_postman_id": "416ae1c3-2714-48f8-8bc7-9f3c56888196",
+		"name": "B2 ZOUBAIROV-RASOANAIVO",
+		"description": "### **R4.01 : Gestion des consultations d'un cabinet médical avec contrôle d'accès.**\n\n2 APIS vont être nécessaires :\n\n**\\- AppMed** : API de gestions des ressources suivantes :\n\n- Médecin\n    \n- Patient\n    \n- Consultation\n    \n- Statistiques\n    \n\n**\\- AuthAPI** : API d'authentification indépendante de AppMed mais AppMed utilisera le format des jetons pour contrôles l'accès à ses ressources.\n\nPour faciliter l'évaluation des correcteurs, vous devrez obligatoirement automatiser la gestion du jeton afin que les correcteurs n'est pas",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "32827230"
+	},
+	"item": [
+		{
+			"name": "AppMed",
+			"item": [
+				{
+					"name": "GestionMédecins",
+					"item": [
+						{
+							"name": "BonusFiltres",
+							"item": [
+								{
+									"name": "Médecins filtrés par civilité",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/medecins?civilite=m.",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"medecins"
+											],
+											"query": [
+												{
+													"key": "civilite",
+													"value": "m."
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Médecins filtrés par nom",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/medecins?nom=dupond",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"medecins"
+											],
+											"query": [
+												{
+													"key": "nom",
+													"value": "dupond"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Médecins filtrés par prénom",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/medecins?prenom=gérard",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"medecins"
+											],
+											"query": [
+												{
+													"key": "prenom",
+													"value": "gérard"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Créer un médecin",
+							"event": [
+								{
+									"listen": "prerequest",
+									"script": {
+										"exec": [
+											""
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"civilite\":\"M.\",\r\n    \"nom\":\"Dupond\",\r\n    \"prenom\":\"Gérard\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/medecins",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"medecins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtenir tous les médecins",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/medecins",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"medecins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Modifier un médecin (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"nom\":\"Martin\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/medecins/1",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"medecins",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtenir un médecin (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/medecins/1",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"medecins",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Supprimer un médecin (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/medecins/1",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"medecins",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GestionPatients",
+					"item": [
+						{
+							"name": "BonusFiltres",
+							"item": [
+								{
+									"name": "Usagers filtrés par civilité",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/usagers?civilite=m.",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"usagers"
+											],
+											"query": [
+												{
+													"key": "civilite",
+													"value": "m."
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Usagers filtrés par nom",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/usagers?nom=dumond",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"usagers"
+											],
+											"query": [
+												{
+													"key": "nom",
+													"value": "dumond"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Usagers filtrés par prenom",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/usagers?prenom=armand",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"usagers"
+											],
+											"query": [
+												{
+													"key": "prenom",
+													"value": "armand"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Usagers filtrés par numéro de sécurité sociale",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/usagers?numeroSecuriteSociale=112233445566778",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"usagers"
+											],
+											"query": [
+												{
+													"key": "numeroSecuriteSociale",
+													"value": "112233445566778"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Créer un usager",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"civilite\":\"Mme.\",\r\n    \"nom\":\"Dumond\",\r\n    \"prenom\":\"Amandine\",\r\n    \"sexe\":\"F\",\r\n    \"adresse\":\"85, Square de la Couronne\",\r\n    \"code_postal\":\"91120\",\r\n    \"ville\":\"Palaiseau\",\r\n    \"date_nais\":\"14/05/1952\",\r\n    \"lieu_nais\":\"Nantes\",\r\n    \"num_secu\":\"112233445566777\",\r\n    \"id_medecin\":\"1\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/usagers",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"usagers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtenir tous les usagers",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/usagers",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"usagers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Modifier un usager (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"adresse\":\"85, Square de la Couronne\",\r\n    \"code_postal\":\"91120\",\r\n    \"ville\":\"Palaiseau\",\r\n    \"id_medecin\":\"2\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/usagers/2",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"usagers",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtenir un usager (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/usagers/2",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"usagers",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Supprimer un usager (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/usagers/2",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"usagers",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "GestionConsultations",
+					"item": [
+						{
+							"name": "BonusFiltres",
+							"item": [
+								{
+									"name": "Consultations filtrées par médecin",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/consultations?idMedecin=1",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"consultations"
+											],
+											"query": [
+												{
+													"key": "idMedecin",
+													"value": "1"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Consultations filtrées par usager",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/consultations?idUsager=1",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"consultations"
+											],
+											"query": [
+												{
+													"key": "idUsager",
+													"value": "1"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Consultations filtrées par date",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{url_app}}/consultations?date=12/10/24",
+											"host": [
+												"{{url_app}}"
+											],
+											"path": [
+												"consultations"
+											],
+											"query": [
+												{
+													"key": "date",
+													"value": "12/10/24"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "Créer une consultation",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id_usager\":\"1\",\r\n    \"id_medecin\":\"1\",\r\n    \"date_consult\":\"12/10/24\",\r\n    \"heure_consult\":\"11:30\",\r\n    \"duree_consult\":\"30\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/consultations",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"consultations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtenir toutes les consultations",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/consultations",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"consultations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Modifier une consultation (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"id_usager\":\"2\",\r\n    \"id_medecin\":\"8\",\r\n    \"date_consult\":\"12/10/24\",\r\n    \"heure_consult\":\"12:30\",\r\n    \"duree_consult\":\"45\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/consultations/1",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"consultations",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Obtenir une consultation (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/consultations/6",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"consultations",
+										"6"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Supprimer une consultation (id)",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "{{token}}",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_app}}/consultations/6",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"consultations",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Statistiques",
+					"item": [
+						{
+							"name": "Stats médecins",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/stats/medecins",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"stats",
+										"medecins"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Stats usagers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{url_app}}/stats/usagers",
+									"host": [
+										"{{url_app}}"
+									],
+									"path": [
+										"stats",
+										"usagers"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "AuthAPI",
+			"item": [
+				{
+					"name": "BonusRoles",
+					"item": [
+						{
+							"name": "Authentification médecin",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"token\", pm.response.json().donnees);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"login\":\"medecin1\",\r\n    \"mdp\":\"password1234!\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_auth}}",
+									"host": [
+										"{{url_auth}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Authentification usager",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.collectionVariables.set(\"token\", pm.response.json().donnees);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"login\":\"usager1\",\r\n    \"mdp\":\"password1234!\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{url_auth}}",
+									"host": [
+										"{{url_auth}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Demande authentification",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"token\", pm.response.json().donnees);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"login\":\"secretaire1\",\r\n    \"mdp\":\"password1234!\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url_auth}}",
+							"host": [
+								"{{url_auth}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Demande validation",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url_auth}}",
+							"host": [
+								"{{url_auth}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url_auth",
+			"value": "https://medical-office.alwaysdata.net/api/API_auth.php",
+			"type": "string"
+		},
+		{
+			"key": "url_app",
+			"value": "https://medical-office-ressources.alwaysdata.net/",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}

@@ -1,6 +1,6 @@
 <?php
 
-$urlAPI_usagers = "http://localhost/api-php-medical-office-website/php/api/API_usagers.php";
+$urlAPI_usagers = "https://medical-office-ressources.alwaysdata.net/usagers";
 
 function API_getUsagers(string | null $nom, string | null $prenom) : array | int {
     $url = $GLOBALS["urlAPI_usagers"] . ajouterParamsURL1($nom, $prenom);
@@ -8,6 +8,8 @@ function API_getUsagers(string | null $nom, string | null $prenom) : array | int
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    $authorization = "Authorization: Bearer ".$_SESSION["jwt"];
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/json', $authorization));
     $resultat = curl_exec($ch);
     curl_close($ch);
     
@@ -19,7 +21,7 @@ function API_getUsagers(string | null $nom, string | null $prenom) : array | int
     }
 }
 
-function API_addMedecin(string $civilite, string $nom, string $prenom) : null | array {
+function API_addUsager(string $civilite, string $nom, string $prenom) : null | array {
     $url = $GLOBALS["urlAPI_medecins"];
 
     $infosConsultation = array(

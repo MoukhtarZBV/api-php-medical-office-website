@@ -10,7 +10,7 @@
         $motDePasse = $_POST['motDePasse'];
     
         $messageErreur = '';
-        if ($nomUtilisateur == 'root' && $motDePasse == 'admin') {
+        if ($nomUtilisateur == 'secretaire1' && $motDePasse == 'password1234!') {
             $_SESSION['utilisateur'] = $nomUtilisateur;
             $_SESSION["jwt"] = API_getToken($nomUtilisateur, $motDePasse);
             header('Location: index.php');
